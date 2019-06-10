@@ -1,9 +1,9 @@
 
-#include "RXPipe.hpp"
+#include "rx_pipe.hpp"
 #include "NRF24L01_Definitions.hpp"
 
-namespace NRF24L01 {
-    RXPipe &RXPipe::auto_acknowledgement(bool value) {
+namespace nrf24l01 {
+    rx_pipe &rx_pipe::auto_acknowledgement(bool value) {
         uint8_t full_register;
         nrf.read_register(NRF_REGISTER::EN_AA, &full_register);
         if (value) {
@@ -15,7 +15,7 @@ namespace NRF24L01 {
         return *this;
     }
 
-    RXPipe &RXPipe::enabled(bool value) {
+    rx_pipe &rx_pipe::enabled(bool value) {
         uint8_t full_register;
         nrf.read_register(NRF_REGISTER::EN_RXADDR, &full_register);
         if (value) {
@@ -27,7 +27,7 @@ namespace NRF24L01 {
         return *this;
     }
 
-    RXPipe &RXPipe::getAddress(uint8_t out[5]) {
+    rx_pipe &rx_pipe::getAddress(uint8_t out[5]) {
         // Todo probably do this properly
         uint8_t address_length;
         nrf.read_register(NRF_REGISTER::SETUP_AW, &address_length);
@@ -42,23 +42,23 @@ namespace NRF24L01 {
 
     }
 
-    RXPipe &RXPipe::setAddress(uint8_t *address) {
+    rx_pipe &rx_pipe::setAddress(const uint8_t *address) {
         nrf.write_register(NRF_REGISTER::RX_ADDR_P0 + pipe_number, address, true);
         return *this;
     }
 
 
-    RXPipe &RXPipe::setPayloadWidth(const uint8_t &width) {
+    rx_pipe &rx_pipe::setPayloadWidth(const uint8_t &width) {
         nrf.write_register(NRF_REGISTER::RX_PW_P0 + pipe_number, width & uint8_t(0x0F));
         return *this;
     }
 
-    RXPipe &RXPipe::getPayloadWidth(uint8_t *out) {
+    rx_pipe &rx_pipe::getPayloadWidth(uint8_t *out) {
         nrf.read_register(NRF_REGISTER::RX_PW_P0 + pipe_number, out);
         return *this;
     }
 
-    RXPipe &RXPipe::setDynamicPacketLength(bool value) {
+    rx_pipe &rx_pipe::setDynamicPacketLength(bool value) {
         uint8_t previousVal;
         nrf.read_register(NRF_REGISTER::DYNPD, &previousVal);
         if (value) {

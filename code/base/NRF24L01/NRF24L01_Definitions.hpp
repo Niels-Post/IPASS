@@ -26,7 +26,7 @@
     DEALINGS IN THE SOFTWARE.
 */
 
-namespace NRF24L01 {
+namespace nrf24l01 {
     /**
      * Register addresses for the NRF24L01
      */
@@ -84,6 +84,9 @@ namespace NRF24L01 {
         //! Enable features
         static constexpr const uint8_t FEATURE = 0x1D;
     };
+
+
+
 
 
     /**
@@ -170,7 +173,7 @@ namespace NRF24L01 {
         //! Flag: Maximum number of retransmissions reached (write 1 to clear)
         static constexpr const uint8_t MAX_RT = 0x10;
         //! Pipe number of data in first slot of fifo (111 if no data is available)
-        static constexpr const uint8_t RX_P_NO = 0x02;
+        static constexpr const uint8_t RX_P_NO = 0x0D;
         //! Flag: Transmit register is full
         static constexpr const uint8_t TX_FULL = 0x01;
     };

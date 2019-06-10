@@ -1,0 +1,42 @@
+//
+// Created by Niels on 6/10/2019.
+//
+
+#ifndef IPASS_MESH_NRF_CONNECTIVITY_HPP
+#define IPASS_MESH_NRF_CONNECTIVITY_HPP
+
+#include "../Mesh/mesh_connectivity_adapter.hpp"
+#include "../NRF24L01/nrf24l01plus.hpp"
+
+class mesh_nrf_connectivity: mesh::mesh_connectivity_adapter {
+private:
+    static constexpr const uint8_t discovery_address[5] = {0x70, 0x70, 0x70, 0x70, 0x70};
+    static constexpr const uint8_t base_address[5] = {0x72, 0x72, 0x72, 0x72, 0x70};
+    nrf24l01::nrf24l01plus &nrf;
+    std::array<uint8_t, 5> pipes;
+    uint8_t used_pipes = 0;
+public:
+    mesh_nrf_connectivity(nrf24l01::nrf24l01plus &nrf);
+
+
+private:
+    void send_message(mesh::mesh_message &message);
+public:
+
+
+    void broadcast(mesh::mesh_message &message) override;
+    bool unicast(mesh::mesh_message &message, uint8_t next_address) override;
+
+    bool is_message_available() override;
+
+    mesh::mesh_message first_message() override;
+
+    bool direct_connection_possible() override;
+
+    void add_direct_connection(const uint8_t &address) override;
+
+    void remove_direct_connection(const uint8_t &address) override;
+};
+
+
+#endif //IPASS_MESH_NRF_CONNECTIVITY_HPP

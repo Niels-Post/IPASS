@@ -6,11 +6,11 @@
 #include "../SPI/spi_bitbang.hpp"
 #include  "NRF24L01_Definitions.hpp"
 
-namespace NRF24L01 {
+namespace nrf24l01 {
     /**
      * Interface for the NRF24L01+ NRF tranceiver.
      */
-    class NRF24L01Plus {
+    class nrf24l01plus {
         hwlib_ex::spi_base_bus &bus;
         hwlib::pin_out &csn;
         hwlib::pin_out &ce;
@@ -35,7 +35,7 @@ namespace NRF24L01 {
          * @param csn Chip Select pin
          * @param ce Chip Enable Pin
          */
-        NRF24L01Plus(hwlib_ex::spi_base_bus &bus, hwlib::pin_out &csn, hwlib::pin_out &ce);
+        nrf24l01plus(hwlib_ex::spi_base_bus &bus, hwlib::pin_out &csn, hwlib::pin_out &ce);
 
         /**
          * Sends SPI command to NRF24L01Plus device
@@ -46,7 +46,7 @@ namespace NRF24L01 {
          * @param data_in Pointer to save the command response in, make sure there are at least n bytes available at this address\
          * @param lsbyte_first Should the data be read and written LSByte first (reversed)
          */
-        void send_command(const uint8_t &command_word, uint8_t *data_out = nullptr, const uint8_t &n = 0,
+        void send_command(const uint8_t &command_word, const uint8_t *data_out = nullptr, const uint8_t &n = 0,
                           uint8_t *data_in = nullptr, bool lsbyte_first = false);
 
         /**
@@ -65,7 +65,7 @@ namespace NRF24L01 {
          * @param data Pointer to the data to write into the register
          * @param lsbyte_first Should the written data be written LSByte first (reversed)
          */
-        void write_register(const uint8_t &address, uint8_t *data, bool lsbyte_first = false);
+        void write_register(const uint8_t &address, const uint8_t *data, bool lsbyte_first = false);
 
         /**
          * Write value into register
@@ -79,7 +79,7 @@ namespace NRF24L01 {
          * Reads the latest available payload. If there is none, this will write null bytes
          * @param data Memory location to write data to
          */
-        void read_rx_payload(uint8_t *data);
+        void read_rx_payload(uint8_t *data, const uint8_t payload_width);
 
         /**
          * Clear RX FIFO register
@@ -121,11 +121,13 @@ namespace NRF24L01 {
          */
         void set_channel(uint8_t channel);
 
+
+
         /**
          * Set Address to transmit on
          * @param address Pointer to location of address.
          */
-        void set_tx_address(uint8_t *address);
+        void set_tx_address(const uint8_t *address);
 
         /**
          * Power the NRF24L01 chip up or down
@@ -141,6 +143,19 @@ namespace NRF24L01 {
          * @param newMode
          */
         void set_mode(uint8_t newMode);
+
+        /**
+         * Get status of FIFO registers
+         * @return FIFO status byte
+         */
+        uint8_t fifo_status();
+
+
+        /**
+         * Read width of currently available RX payload
+         * @return The length in bytes
+         */
+        uint8_t read_rx_payload_width();
 
 
     };
