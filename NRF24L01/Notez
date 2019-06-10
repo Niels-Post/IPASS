@@ -1,0 +1,30 @@
+
+Turn On:
+Vcc (duh)
+Register PWR_UP < 1
+Register PRIM_RX < 1 (we wllen hoofdzakelijk ontvangen
+Register EN_AA < 1 (Auto Acknowledgement)
+Register SETUP_RETR < ARC AAntal retries
+
+CE continu aan om te ontvangen
+
+Om te verzenden:
+- Ce laag
+- TX_ADDR setten
+- TX fifo Vullen
+- Ce hoog
+- Wacht 10 us
+- Ce Laag
+- Wachten (?)
+- Ce hoog
+
+
+Enhanced Shockburst
+EN_DPL in Feature register < 1
+In RX: DYNPD REgister moet geset zijn
+In TX: DYNPD>DPL_P0 < 1
+
+
+Address:
+Lengte configuren met AW Register
+Pipes 1-5 moeten zelfde 4 MSBytes hebben
