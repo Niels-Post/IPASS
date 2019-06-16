@@ -45,7 +45,7 @@ namespace nrf24l01 {
          * @return This RXPipe instance, for method chaining
          * \details If pipe_number is between 2 and 5, the first 4 bytes of the address will be retrieved from pipe 1
          */
-        rx_pipe &getAddress(uint8_t out[5]);
+        nrf_address getAddress();
 
         /**
          * \brief Sets address of this pipe
@@ -53,7 +53,7 @@ namespace nrf24l01 {
          * @return This RXPipe instance, for method chaining
          * \details If pipe_number is 0 or 1, this will use a 5 byte address, else only 1 byte will be used
          */
-        rx_pipe &setAddress(const uint8_t *address);
+        rx_pipe &setAddress(const nrf_address &address);
 
         /**
          * \brief Set the payload width for this RX Pipe

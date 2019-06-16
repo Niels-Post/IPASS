@@ -13,7 +13,7 @@ namespace mesh {
         virtual void broadcast(mesh_message &message) = 0;
         virtual bool unicast(mesh_message &message, uint8_t next_address) = 0;
         virtual bool is_message_available() = 0;
-        virtual mesh_message first_message() = 0;
+        virtual mesh_message next_message() = 0;
 
         virtual bool direct_connection_possible() = 0;
         virtual void add_direct_connection(const uint8_t &address) = 0;

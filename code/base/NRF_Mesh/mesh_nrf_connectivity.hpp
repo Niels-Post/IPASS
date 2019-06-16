@@ -7,13 +7,14 @@
 
 #include "../Mesh/mesh_connectivity_adapter.hpp"
 #include "../NRF24L01/nrf24l01plus.hpp"
+#include "../Util/Map.hpp"
 
 class mesh_nrf_connectivity: mesh::mesh_connectivity_adapter {
 private:
-    static constexpr const uint8_t discovery_address[5] = {0x70, 0x70, 0x70, 0x70, 0x70};
-    static constexpr const uint8_t base_address[5] = {0x72, 0x72, 0x72, 0x72, 0x70};
+    Map<uint8_t, uint8_t, 5> address_pipe_map;
+    const nrf24l01::nrf_address discovery_address = {0x70, 0x70, 0x70, 0x70, 0x70};
+    const nrf24l01::nrf_address base_address = {0x72, 0x72, 0x72, 0x72, 0x70};
     nrf24l01::nrf24l01plus &nrf;
-    std::array<uint8_t, 5> pipes;
     uint8_t used_pipes = 0;
 public:
     mesh_nrf_connectivity(nrf24l01::nrf24l01plus &nrf);
@@ -29,7 +30,7 @@ public:
 
     bool is_message_available() override;
 
-    mesh::mesh_message first_message() override;
+    mesh::mesh_message next_message() override;
 
     bool direct_connection_possible() override;
 

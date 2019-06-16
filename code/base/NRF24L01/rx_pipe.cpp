@@ -9,7 +9,7 @@ namespace nrf24l01 {
         if (value) {
             full_register |= 1 << pipe_number;
         } else {
-            full_register &= 0 << pipe_number;
+            full_register &= ~(1 << pipe_number);
         }
         nrf.write_register(NRF_REGISTER::EN_AA, &full_register);
         return *this;
@@ -27,23 +27,24 @@ namespace nrf24l01 {
         return *this;
     }
 
-    rx_pipe &rx_pipe::getAddress(uint8_t out[5]) {
-        // Todo probably do this properly
-        uint8_t address_length;
-        nrf.read_register(NRF_REGISTER::SETUP_AW, &address_length);
-        address_length += 2;
-        auto *address = new uint8_t[address_length];
-        nrf.read_register(pipe_number == 0 ? NRF_REGISTER::RX_ADDR_P0 : NRF_REGISTER::RX_ADDR_P1, address);
-//        reverse_char_array(address, address_length);
-        if (pipe_number > 1) {
-            nrf.read_register(NRF_REGISTER::RX_ADDR_P0 + pipe_number, address + address_length - 1);
-        }
-        return *this;
+    nrf_address rx_pipe::getAddress() {
+        // TODO Implement Address width
 
+        if(pipe_number > 1) {
+            nrf_address base_address;
+            uint8_t end;
+            nrf.read_register(NRF_REGISTER::RX_ADDR_P1, base_address.address_bytes);
+            nrf.read_register(NRF_REGISTER::RX_ADDR_P0 + pipe_number, &end);
+            return {base_address, end};
+        }
+
+        uint8_t address[5] = {0};
+        nrf.read_register(NRF_REGISTER::RX_ADDR_P0 + pipe_number, address, true);
+        return {address};
     }
 
-    rx_pipe &rx_pipe::setAddress(const uint8_t *address) {
-        nrf.write_register(NRF_REGISTER::RX_ADDR_P0 + pipe_number, address, true);
+    rx_pipe &rx_pipe::setAddress(const nrf_address &address) {
+        nrf.write_register(NRF_REGISTER::RX_ADDR_P0 + pipe_number, address.address_bytes, true);
         return *this;
     }
 

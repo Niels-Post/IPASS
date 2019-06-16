@@ -58,14 +58,7 @@ namespace nrf24l01 {
     }
 
     void nrf24l01plus::write_register(const uint8_t &address, uint8_t data) {
-
-        if (currentMode == MODE_PRX) {
-            ce.write(false);
-        }
         write_register(address, &data);
-        if (currentMode == MODE_PRX) {
-            ce.write(true);
-        }
     }
 
     void nrf24l01plus::auto_retransmit(uint8_t retry_delay, uint8_t retry_count) {
@@ -76,8 +69,8 @@ namespace nrf24l01 {
         write_register(NRF_REGISTER::RF_CH, channel & uint8_t(0xEF));
     }
 
-    void nrf24l01plus::set_tx_address(const uint8_t *address) {
-        write_register(NRF_REGISTER::TX_ADDR, address);
+    void nrf24l01plus::set_tx_address(const nrf_address &address) {
+        write_register(NRF_REGISTER::TX_ADDR, address.address_bytes);
     }
 
     void nrf24l01plus::set_mode(uint8_t newMode) {
@@ -145,6 +138,7 @@ namespace nrf24l01 {
         send_command(nrf24l01::NRF_INSTRUCTION::R_RX_PL_WID, nullptr, 1, &pw);
         return pw;
     }
+
 
 
 }

@@ -50,8 +50,11 @@ int main() {
     nrf.power(true);
     auto mesh_connectivity = mesh_nrf_connectivity(nrf);
 
-    mesh::mesh_message test = {12, 0, 0, 0, nullptr};
-    mesh_connectivity.broadcast(test);
+    mesh::mesh_message test = {12, 0, 0x0F, 0, nullptr};
+    mesh_connectivity.add_direct_connection(0x0F);
+
+    mesh_connectivity.unicast(test, test.receiver);
+
 
 //    nrf.auto_retransmit(0, 0);
 //    rx_all_pipes(nrf)

@@ -6,6 +6,7 @@
 #define IPASS_MESH_NODE_HPP
 
 namespace mesh {
+
     class mesh_node {
 
     };
