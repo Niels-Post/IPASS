@@ -14,7 +14,9 @@ private:
     Map<uint8_t, uint8_t, 5> address_pipe_map;
     const nrf24l01::nrf_address discovery_address = {0x70, 0x70, 0x70, 0x70, 0x70};
     const nrf24l01::nrf_address base_address = {0x72, 0x72, 0x72, 0x72, 0x70};
+public:
     nrf24l01::nrf24l01plus &nrf;
+private:
     uint8_t used_pipes = 0;
 public:
     mesh_nrf_connectivity(nrf24l01::nrf24l01plus &nrf);

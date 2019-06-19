@@ -5,12 +5,15 @@
 #include "mesh_nrf_connectivity.hpp"
 #include "../NRF24L01/rx_pipe.hpp"
 #include "../NRF24L01/rx_all_pipes.hpp"
-
+#include "../Util/huts.hpp"
 
 mesh_nrf_connectivity::mesh_nrf_connectivity(nrf24l01::nrf24l01plus &nrf) : nrf(nrf) {
+
+    nrf.write_register(nrf24l01::NRF_REGISTER::FEATURE, 4);
+
     nrf24l01::rx_all_pipes(nrf)
             .enabled(false)
-            .auto_acknowledgement(true)
+            .auto_acknowledgement(false)
             .setDynamicPacketLength(true);
 
     nrf24l01::rx_pipe(nrf, 0)
@@ -20,14 +23,19 @@ mesh_nrf_connectivity::mesh_nrf_connectivity(nrf24l01::nrf24l01plus &nrf) : nrf(
 
     nrf24l01::rx_pipe(nrf, 1)
             .setAddress(base_address);
+
     nrf.set_mode(nrf.MODE_PRX);
 }
 
 bool mesh_nrf_connectivity::unicast(mesh::mesh_message &message, uint8_t next_address) {
-    uint8_t send_pipe = address_pipe_map.get(next_address, -1);
-    if (send_pipe == uint8_t(-1)) {
+    huts::a_niffau();
+    uint8_t send_pipe = address_pipe_map.get(next_address, 5);
+    nrf.bus.transaction(nrf.csn).write_byte(send_pipe);
+    huts::a_niffau();
+    if (send_pipe == 5) {
         return false;
     }
+
 
     nrf.set_mode(nrf.MODE_PTX);
 
@@ -39,6 +47,7 @@ bool mesh_nrf_connectivity::unicast(mesh::mesh_message &message, uint8_t next_ad
 
     nrf.set_tx_address(address);
 
+
     send_message(message);
 
     nrf.set_tx_address(discovery_address);
@@ -46,6 +55,7 @@ bool mesh_nrf_connectivity::unicast(mesh::mesh_message &message, uint8_t next_ad
     nrf24l01::rx_pipe(nrf, 0).setAddress(discovery_address);
     nrf24l01::rx_pipe(nrf, send_pipe)
             .enabled(true);
+
 
     nrf.set_mode(nrf.MODE_PRX);
 
@@ -87,6 +97,7 @@ void mesh_nrf_connectivity::add_direct_connection(const uint8_t &address) {
     nrf24l01::nrf_address full_address = {discovery_address, address};
 
     address_pipe_map.put(address, ++used_pipes);
+    //Todo this might not be needed
     nrf24l01::rx_pipe(nrf, used_pipes)
             .setAddress(full_address)
             .enabled(true)

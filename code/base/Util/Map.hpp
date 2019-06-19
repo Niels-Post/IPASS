@@ -8,12 +8,12 @@
 
 template<class K, class V, int capacity=16>
 class Map {
-    K KeyArray[capacity] = {};
-    V ValueArray[capacity] = {};
-    size_t currentSize;
+    K KeyArray[capacity] = {0};
+    V ValueArray[capacity] = {0};
+    size_t currentSize = 0;
 
 public:
-    Map() {}
+    Map() = default;
 
 
 
@@ -31,7 +31,7 @@ public:
         return true;
     }
 
-    V get(K key, V defaultVal) {
+    V get(const K &key, const V &defaultVal) {
         for (size_t i = 0; i < currentSize; i++) {
             if (KeyArray[i] == key) {
                 return ValueArray[i];

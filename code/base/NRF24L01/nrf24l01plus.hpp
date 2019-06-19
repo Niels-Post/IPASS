@@ -50,6 +50,7 @@ namespace nrf24l01 {
      * Interface for the NRF24L01+ NRF tranceiver.
      */
     class nrf24l01plus {
+    public:
         hwlib_ex::spi_base_bus &bus;
         hwlib::pin_out &csn;
         hwlib::pin_out &ce;
@@ -57,7 +58,6 @@ namespace nrf24l01 {
         uint8_t register_bytes(const uint8_t &address);
 
         uint8_t currentMode = 0;
-    public:
         //! No mode, this usually indicates Power Off or Standby mode
         const uint8_t MODE_NONE = 0;
         //! Primary TX mode, ce is only asserted when transmitting payloads

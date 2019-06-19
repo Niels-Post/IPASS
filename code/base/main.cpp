@@ -1,40 +1,48 @@
 #include <hwlib.hpp>
+
+
+
 #include "NRF24L01/nrf24l01plus.hpp"
 #include "NRF24L01/NRF24L01_Definitions.hpp"
 #include "NRF24L01/rx_all_pipes.hpp"
 #include "NRF24L01/rx_pipe.hpp"
 #include "SPI/spi_bitbang.hpp"
 #include "NRF_Mesh/mesh_nrf_connectivity.hpp"
+#include "Util/huts.hpp"
 
 using namespace nrf24l01;
 
-void transmit(nrf24l01plus &nrf, hwlib::pin_out &ce) {
-    nrf.set_mode(nrf.MODE_PTX);
-    nrf.power(true);
 
-//    uint8_t data_receive;
-    uint8_t data[6] = {'H', 'a', 'l', 'l', 'o', 'a'};
-    for (;;) {
-        nrf.write_tx_payload(data, 6);
-        nrf.read_register(NRF_REGISTER::FIFO_STATUS);
-        hwlib::wait_ms(5);
+
+void transmit(mesh_nrf_connectivity &connectivity) {
+    mesh::mesh_message test = {12, 0, 0x0F, 0, nullptr};
+
+    connectivity.add_direct_connection(0x0F);
+    for(;;) {
+        connectivity.unicast(test, test.receiver);
+        test.sender++;
+        hwlib::wait_ms(100);
     }
+
 }
 
+void toontje() {}
 
-void receive(nrf24l01plus &nrf, hwlib::pin_out &ce) {
-    nrf.set_mode(nrf.MODE_PRX);
-    nrf.power(true);
-    uint8_t status_check;
-    uint8_t data[32];
-    for (;;) {
-        nrf.read_register(NRF_REGISTER::FIFO_STATUS, &status_check);
-        if ((status_check & NRF_FIFO_STATUS::RX_EMPTY) == 0) {
-            nrf.read_rx_payload(data, 0);
+void receive(mesh_nrf_connectivity &connectivity){
+    connectivity.add_direct_connection(0x0F);
+    for(;;) {
+       if(connectivity.is_message_available()) {
+            connectivity.next_message();
+            hwlib::wait_ms(100);
+            huts::a_niffau();
         }
         hwlib::wait_ms(10);
     }
 }
+
+
+
+
 
 
 int main() {
@@ -50,11 +58,8 @@ int main() {
     nrf.power(true);
     auto mesh_connectivity = mesh_nrf_connectivity(nrf);
 
-    mesh::mesh_message test = {12, 0, 0x0F, 0, nullptr};
-    mesh_connectivity.add_direct_connection(0x0F);
-
-    mesh_connectivity.unicast(test, test.receiver);
-
+    transmit(mesh_connectivity);
+//    receive(mesh_connectivity);
 
 //    nrf.auto_retransmit(0, 0);
 //    rx_all_pipes(nrf)

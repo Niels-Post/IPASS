@@ -70,7 +70,7 @@ namespace nrf24l01 {
     }
 
     void nrf24l01plus::set_tx_address(const nrf_address &address) {
-        write_register(NRF_REGISTER::TX_ADDR, address.address_bytes);
+        write_register(NRF_REGISTER::TX_ADDR, address.address_bytes, true);
     }
 
     void nrf24l01plus::set_mode(uint8_t newMode) {
