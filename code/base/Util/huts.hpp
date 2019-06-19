@@ -3,6 +3,7 @@
 #define PROJECT_HUTS_HPP
 
 #include <hwlib.hpp>
+
 class huts {
 public:
     static void a_niffau() {
@@ -13,4 +14,5 @@ public:
         }
     }
 };
+
 #endif //PROJECT_HUTS_HPP

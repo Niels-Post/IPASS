@@ -4,17 +4,18 @@
 
 #ifndef IPASS_MAP_HPP
 #define IPASS_MAP_HPP
+
 #include <hwlib.hpp>
 
-template<class K, class V, int capacity=16>
+template<class K, class V, int capacity = 16>
 class Map {
+protected:
     K KeyArray[capacity] = {0};
     V ValueArray[capacity] = {0};
     size_t currentSize = 0;
 
 public:
     Map() = default;
-
 
 
     size_t size() {
@@ -31,6 +32,10 @@ public:
         return true;
     }
 
+    V at(const size_t &i) {
+        return KeyArray[i];
+    }
+
     V get(const K &key, const V &defaultVal) {
         for (size_t i = 0; i < currentSize; i++) {
             if (KeyArray[i] == key) {
@@ -40,14 +45,15 @@ public:
         return defaultVal;
     }
 
-    K find(V val, K defaultKey) {
+    bool has(const K &key) {
         for (size_t i = 0; i < currentSize; i++) {
-            if (ValueArray[i] == val) {
-                return KeyArray[i];
+            if (KeyArray[i] == key) {
+                return true;
             }
         }
-        return defaultKey;
+        return false;
     }
+
 
     V remove(K key, V defaultVal) {
         for (size_t i = 0; i < currentSize; i++) {
@@ -61,19 +67,15 @@ public:
     }
 
     void remove(uint8_t index) {
-        for(size_t i = index; i < currentSize-1; i++) {
-            KeyArray[i] = KeyArray[i+1];
-            ValueArray[i] = ValueArray[i+1];
+        for (size_t i = index; i < currentSize - 1; i++) {
+            KeyArray[i] = KeyArray[i + 1];
+            ValueArray[i] = ValueArray[i + 1];
         }
         currentSize--;
     }
 
 
-
-
 };
-
-
 
 
 #endif //IPASS_MAP_HPP

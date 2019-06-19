@@ -86,9 +86,6 @@ namespace nrf24l01 {
     };
 
 
-
-
-
     /**
      * CONFIG register bit mappings
      */

@@ -41,7 +41,7 @@ namespace hwlib_ex {
         return *this;
     }
 
-    spi_base_bus::spi_transaction::spi_transaction(spi_base_bus &bus, hwlib::pin_out &csn): bus(bus), csn(csn) {
+    spi_base_bus::spi_transaction::spi_transaction(spi_base_bus &bus, hwlib::pin_out &csn) : bus(bus), csn(csn) {
         bus.onStart(*this);
     }
 
@@ -106,5 +106,5 @@ namespace hwlib_ex {
                                                                                       clock_phase(clockPhase),
                                                                                       half_time_ns(halfTimeNs) {}
 
-    spi_mode::spi_mode()= default;
+    spi_mode::spi_mode() = default;
 }

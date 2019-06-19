@@ -7,7 +7,8 @@
 
 namespace mesh {
     class mesh_router {
-
+    public:
+        virtual void update() = 0;
     };
 }
 

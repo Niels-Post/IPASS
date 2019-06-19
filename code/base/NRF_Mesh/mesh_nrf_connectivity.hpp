@@ -9,25 +9,40 @@
 #include "../NRF24L01/nrf24l01plus.hpp"
 #include "../Util/Map.hpp"
 
-class mesh_nrf_connectivity: mesh::mesh_connectivity_adapter {
+typedef uint8_t mesh_address;
+
+struct pipe {
+    mesh_address pipe;
+    uint8_t address;
+};
+
+class mesh_nrf_connectivity : public mesh::mesh_connectivity_adapter {
 private:
-    Map<uint8_t, uint8_t, 5> address_pipe_map;
+    uint8_t pipe_addresses[6] = {0};
+    uint8_t pipe_nrf_addresses[6] = {0};
+    bool accepted[6] = {false};
+
     const nrf24l01::nrf_address discovery_address = {0x70, 0x70, 0x70, 0x70, 0x70};
     const nrf24l01::nrf_address base_address = {0x72, 0x72, 0x72, 0x72, 0x70};
-public:
     nrf24l01::nrf24l01plus &nrf;
-private:
-    uint8_t used_pipes = 0;
+    uint8_t next_pipe = 1;
+
+    uint8_t getPipeByNRFAddress(const uint8_t &nrfaddress);
+    uint8_t getPipeByAddress(const uint8_t &address);
 public:
-    mesh_nrf_connectivity(nrf24l01::nrf24l01plus &nrf);
+    mesh_nrf_connectivity(uint8_t address, nrf24l01::nrf24l01plus &nrf);
+
 
 
 private:
-    void send_message(mesh::mesh_message &message);
+    void send_message(mesh::mesh_message &message, const bool &broadcast);
+    void listen();
+
 public:
 
 
     void broadcast(mesh::mesh_message &message) override;
+
     bool unicast(mesh::mesh_message &message, uint8_t next_address) override;
 
     bool is_message_available() override;
@@ -36,9 +51,17 @@ public:
 
     bool direct_connection_possible() override;
 
-    void add_direct_connection(const uint8_t &address) override;
+
+    mesh::mesh_connection_state connection_state(const uint8_t &address) override;
+
+
+    bool connect(mesh::mesh_message &origin) override;
 
     void remove_direct_connection(const uint8_t &address) override;
+
+    bool onConnect(mesh::mesh_message &origin) override;
+
+    void onAccept(mesh::mesh_message &origin) override;
 };
 
 

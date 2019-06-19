@@ -9,7 +9,7 @@
 #############################################################################
 
 # source files in this project (main.cpp is automatically assumed)
-SOURCES := Mesh/mesh_connectivity_adapter.cpp Mesh/mesh_message.cpp Mesh/mesh_node.cpp Mesh/mesh_router.cpp NRF24L01/nrf24l01plus.cpp NRF24L01/rx_all_pipes.cpp NRF24L01/rx_pipe.cpp NRF_Mesh/mesh_nrf_connectivity.cpp SPI/spi_base.cpp SPI/spi_bitbang.cpp
+SOURCES := NRF24L01/rx_all_pipes.cpp NRF24L01/rx_pipe.cpp NRF_Mesh/mesh_nrf_connectivity.cpp SPI/spi_base.cpp SPI/spi_bitbang.cpp
 
 # header files in this project
 HEADERS :=

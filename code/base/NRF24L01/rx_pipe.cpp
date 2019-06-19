@@ -30,7 +30,7 @@ namespace nrf24l01 {
     nrf_address rx_pipe::getAddress() {
         // TODO Implement Address width
 
-        if(pipe_number > 1) {
+        if (pipe_number > 1) {
             nrf_address base_address;
             uint8_t end;
             nrf.read_register(NRF_REGISTER::RX_ADDR_P1, base_address.address_bytes);
@@ -44,7 +44,13 @@ namespace nrf24l01 {
     }
 
     rx_pipe &rx_pipe::setAddress(const nrf_address &address) {
-        nrf.write_register(NRF_REGISTER::RX_ADDR_P0 + pipe_number, address.address_bytes, true);
+        if(pipe_number > 1) {
+            nrf.write_register(NRF_REGISTER::RX_ADDR_P0 + pipe_number, address.address_bytes + 4, true);
+        } else {
+            nrf.write_register(NRF_REGISTER::RX_ADDR_P0 + pipe_number, address.address_bytes, true);
+        }
+
+
         return *this;
     }
 

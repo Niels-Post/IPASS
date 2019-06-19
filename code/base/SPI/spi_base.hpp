@@ -21,14 +21,18 @@ namespace hwlib_ex {
     class spi_base_bus {
     protected:
         spi_mode mode;
+
         virtual void write_read(size_t n, const uint8_t *data_out, uint8_t *data_in);
+
         virtual void write_read_reverse(size_t n, const uint8_t *data_out, uint8_t *data_in);
+
     public:
         class spi_transaction final {
         private:
             spi_base_bus &bus;
         public:
             hwlib::pin_out &csn;
+
             explicit spi_transaction(spi_base_bus &bus, hwlib::pin_out &csn);
 
             ~spi_transaction();
@@ -52,7 +56,9 @@ namespace hwlib_ex {
 
     protected:
         virtual void onStart(spi_transaction &transaction);
+
         virtual void onEnd(spi_transaction &transaction);
+
     public:
 
 
