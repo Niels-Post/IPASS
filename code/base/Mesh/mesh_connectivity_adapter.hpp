@@ -9,10 +9,16 @@
 
 #include "mesh_message.hpp"
 
+
+
 namespace mesh {
+
+
+
     enum mesh_connection_state {
         DISCONNECTED,
-        CONNECTED,
+        WAITING,
+        RESPONDED,
         ACCEPTED
     };
 
@@ -26,7 +32,6 @@ namespace mesh {
 
         virtual bool unicast(mesh_message &message, uint8_t next_address = 0) = 0;
 
-
         virtual bool is_message_available() = 0;
 
         virtual mesh_message next_message() = 0;
@@ -35,11 +40,13 @@ namespace mesh {
 
         virtual mesh_connection_state connection_state(const uint8_t &address) = 0;
 
-        virtual bool connect(mesh::mesh_message &origin) = 0;
+        virtual bool discovery_respond(mesh::mesh_message &origin) = 0;
 
-        virtual bool onConnect(mesh::mesh_message &origin) = 0;
+        virtual bool on_discovery_respond(mesh::mesh_message &origin) = 0;
 
-        virtual void onAccept(mesh::mesh_message &origin) = 0;
+        virtual void on_discovery_accept(mesh::mesh_message &origin) = 0;
+
+
 
         virtual void remove_direct_connection(const uint8_t &address) = 0;
     };

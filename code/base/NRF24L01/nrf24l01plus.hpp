@@ -41,6 +41,10 @@ namespace nrf24l01 {
             return false;
         }
 
+        bool operator==(const uint8_t &rhs) const {
+            return (address_bytes[4] != rhs);
+        }
+
         bool operator!=(const nrf_address &rhs) const {
             return !(rhs == *this);
         }
@@ -204,7 +208,7 @@ namespace nrf24l01 {
          * Set RF channel to transmit/receive on
          * @param channel  Channel offset from 2.4gHz (in mHz)
          */
-        void set_channel(uint8_t channel){
+        void channel(uint8_t channel){
             write_register(NRF_REGISTER::RF_CH, channel & uint8_t(0xEF));
         }
 
@@ -212,7 +216,7 @@ namespace nrf24l01 {
          * Set Address to transmit on
          * @param address Pointer to location of address.
          */
-        void set_tx_address(const nrf_address &address) {
+        void tx_set_address(const nrf_address &address) {
             write_register(NRF_REGISTER::TX_ADDR, address.address_bytes, true);
         }
 
@@ -223,7 +227,7 @@ namespace nrf24l01 {
          * 2: Primary Receive
          * @param newMode
          */
-        void set_mode(uint8_t newMode){
+        void mode(uint8_t newMode){
             if (currentMode == newMode) {
                 return;
             }
@@ -290,7 +294,7 @@ namespace nrf24l01 {
          * Read width of currently available RX payload
          * @return The length in bytes
          */
-        uint8_t read_rx_payload_width(){
+        uint8_t rx_payload_width(){
             uint8_t pw;
             send_command(nrf24l01::NRF_INSTRUCTION::R_RX_PL_WID, nullptr, 1, &pw);
             return pw;
@@ -305,7 +309,7 @@ namespace nrf24l01 {
          * @param data Memory location to write data to
          * @param payload_width Width of the payload to read
          */
-        void read_rx_payload(uint8_t *data, const uint8_t &payload_width = 32) {
+        void rx_read_payload(uint8_t *data, const uint8_t &payload_width = 32) {
             send_command(NRF_INSTRUCTION::R_RX_PAYLOAD, nullptr, payload_width, data);
         }
 
@@ -315,14 +319,14 @@ namespace nrf24l01 {
          * @param data Array to read data into
          */
         template<size_t n>
-        void read_rx_payload(std::array<uint8_t, n> &data) {
-            read_rx_payload(data.begin(), n);
+        void rx_read_payload(std::array<uint8_t, n> &data) {
+            rx_read_payload(data.begin(), n);
         }
 
         /**
          * Clear RX FIFO register
          */
-        void flush_rx() {
+        void rx_flush() {
             send_command(NRF_INSTRUCTION::FLUSH_RX);
         }
 
@@ -331,7 +335,7 @@ namespace nrf24l01 {
         /**
          * Transmit the first available TX Payload in TX FIFO register
          */
-        void send_buffered_tx_payload(){
+        void tx_send_payload(){
             ce.write(true);
             hwlib::wait_us(10);
             ce.write(false);
@@ -344,14 +348,14 @@ namespace nrf24l01 {
          * @param data Memory location to write data from
          * @param size Size of the data to write
          */
-        void write_tx_payload(uint8_t *data, const uint8_t &size, bool noack = false){
+        void tx_write_payload(uint8_t *data, const uint8_t &size, bool noack = false){
             if(noack) {
                 send_command(NRF_INSTRUCTION::W_TX_PAYLOAD_NO_ACK, data, size, nullptr);
             } else {
                 send_command(NRF_INSTRUCTION::W_TX_PAYLOAD, data, size, nullptr);
             }
 
-            send_buffered_tx_payload();
+            tx_send_payload();
         }
 
         /**
@@ -360,18 +364,101 @@ namespace nrf24l01 {
          * @param out Array of data to write
          */
         template<size_t n>
-        void write_tx_payload(const std::array<uint8_t, n> &out, bool noack = false) {
-            write_tx_payload(out.begin(), n, noack);
+        void tx_write_payload(const std::array<uint8_t, n> &out, bool noack = false) {
+            tx_write_payload(out.begin(), n, noack);
         }
 
 
         /**
          * Clear TX FIFO register
          */
-        void flush_tx(){
+        void tx_flush(){
             send_command(NRF_INSTRUCTION::FLUSH_TX);
         }
 
+
+        void rx_auto_acknowledgement(const uint8_t &pipe, const bool &value) {
+            uint8_t full_register;
+            read_register(NRF_REGISTER::EN_AA, &full_register);
+            if (value) {
+                full_register |= 1 << pipe;
+            } else {
+                full_register &= ~(1 << pipe);
+            }
+            write_register(NRF_REGISTER::EN_AA, &full_register);
+        }
+
+        void rx_auto_acknowledgement(const bool &value) {
+            write_register(NRF_REGISTER::EN_AA, uint8_t(value ? 0x3F : 0x00));
+        }
+
+        void rx_enabled(const uint8_t &pipe, const bool &value) {
+            uint8_t full_register;
+            read_register(NRF_REGISTER::EN_RXADDR, &full_register);
+            if (value) {
+                full_register |= 1 << pipe;
+            } else {
+                full_register &= ~(1 << pipe);
+            }
+            write_register(NRF_REGISTER::EN_RXADDR, &full_register);
+        }
+
+        void rx_enabled(const bool &value) {
+            nrf.write_register(NRF_REGISTER::EN_RXADDR, uint8_t(value ? 0x3F : 0x00));
+        }
+
+        nrf_address rx_get_address(const uint8_t &pipe) {
+            if (pipe > 1) {
+                nrf_address base_address;
+                uint8_t end;
+                read_register(NRF_REGISTER::RX_ADDR_P1, base_address.address_bytes);
+                read_register(NRF_REGISTER::RX_ADDR_P0 + pipe, &end);
+                return {base_address, end};
+            }
+
+            uint8_t address[5] = {0};
+            read_register(NRF_REGISTER::RX_ADDR_P0 + pipe, address, true);
+            return {address};
+        }
+
+        void rx_set_address(const uint8_t &pipe, nrf_address &address) {
+            if(pipe > 1) {
+                write_register(NRF_REGISTER::RX_ADDR_P0 + pipe, address.address_bytes + 4, true);
+            } else {
+                write_register(NRF_REGISTER::RX_ADDR_P0 + pipe, address.address_bytes, true);
+            }
+        }
+
+        void rx_set_payload_width(const uint8_t &pipe, const uint8_t &width) {
+            write_register(NRF_REGISTER::RX_PW_P0 + pipe, width & uint8_t(0x0F));
+        }
+
+        void rx_set_payload_width(const uint8_t &width) {
+            for (uint8_t i = 0; i < 6; i++) {
+                rx_set_payload_width(i, width);
+            }
+        }
+
+        uint8_t rx_get_payload_width(const uint8_t &pipe) {
+            uint8_t width;
+            read_register(NRF_REGISTER::RX_PW_P0 + pipe, &width);
+            return width;
+        }
+
+        void rx_set_dynamic_payload_length(const uint8_t &pipe, const bool &enabled) {
+            uint8_t previousVal;
+            read_register(NRF_REGISTER::DYNPD, &previousVal);
+            if (value) {
+                previousVal |= 1 << pipe;
+            } else {
+                previousVal &= ~(1 << pipe);
+            }
+            write_register(NRF_REGISTER::DYNPD, &previousVal);
+        }
+
+        void rx_set_dynamic_payload_length(const bool & enabled) {
+            write_register(NRF_REGISTER::DYNPD, uint8_t(value ? 0x3F : 0x00));
+        }
 
     };
 }

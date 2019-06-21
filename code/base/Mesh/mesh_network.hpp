@@ -55,11 +55,11 @@ namespace mesh {
                 case DISCOVERY_PRESENT:
                     if (connection.connection_state(msg.sender) == DISCONNECTED) {
                         //todo implement orderly waiting
-                        if (connection.connect(msg)) {
+                        if (connection.discovery_respond(msg)) {
                             huts::a_niffau();
                             huts::a_niffau();
                             huts::a_niffau();
-                            mesh_message connectMessage = {DISCOVERY_CONNECT, ++current_conversation_id,
+                            mesh_message connectMessage = {DISCOVERY_RESPOND, ++current_conversation_id,
                                                            connection.address,
                                                            msg.sender, 0};
                             connection.unicast(connectMessage);
@@ -67,8 +67,8 @@ namespace mesh {
 
                     }
                     break;
-                case DISCOVERY_CONNECT: {
-                    if (connection.onConnect(msg)) {
+                case DISCOVERY_RESPOND: {
+                    if (connection.on_discovery_respond(msg)) {
                         mesh_message finishMessage = {DISCOVERY_ACCEPT, ++current_conversation_id, connection.address,
                                                       msg.sender, 0};
                         connection.unicast(finishMessage);
