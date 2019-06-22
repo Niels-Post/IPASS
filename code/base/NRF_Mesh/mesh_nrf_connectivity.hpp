@@ -19,7 +19,6 @@ typedef uint8_t mesh_address;
 class mesh_nrf_connectivity : public mesh::mesh_connectivity_adapter {
 private:
     std::array<mesh_nrf_connection,6> connections;
-
     const nrf24l01::nrf_address discovery_address = {0x70, 0x70, 0x70, 0x70, 0x70};
     const nrf24l01::nrf_address base_address = {0x72, 0x72, 0x72, 0x72, 0x70};
 
@@ -54,7 +53,7 @@ public:
     mesh::mesh_connection_state connection_state(const uint8_t &address) override;
 
 
-    bool discovery_respond(mesh::mesh_message &origin) override;
+    bool on_discovery_present(mesh::mesh_message &origin) override;
 
     void remove_direct_connection(const uint8_t &address) override;
 

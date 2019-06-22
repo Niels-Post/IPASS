@@ -40,7 +40,8 @@ namespace mesh {
 
         virtual mesh_connection_state connection_state(const uint8_t &address) = 0;
 
-        virtual bool discovery_respond(mesh::mesh_message &origin) = 0;
+
+        virtual bool on_discovery_present(mesh::mesh_message &origin) = 0;
 
         virtual bool on_discovery_respond(mesh::mesh_message &origin) = 0;
 

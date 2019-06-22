@@ -55,7 +55,7 @@ namespace mesh {
                 case DISCOVERY_PRESENT:
                     if (connection.connection_state(msg.sender) == DISCONNECTED) {
                         //todo implement orderly waiting
-                        if (connection.discovery_respond(msg)) {
+                        if (connection.on_discovery_present(msg)) {
                             huts::a_niffau();
                             huts::a_niffau();
                             huts::a_niffau();

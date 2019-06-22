@@ -2,6 +2,7 @@
 // Created by Niels on 6/10/2019.
 //
 
+#include <wsman.h>
 #include "mesh_nrf_connectivity.hpp"
 #include "../Util/huts.hpp"
 
@@ -80,7 +81,7 @@ bool mesh_nrf_connectivity::direct_connection_possible() {
 }
 
 
-bool mesh_nrf_connectivity::discovery_respond(mesh::mesh_message &origin) {
+bool mesh_nrf_connectivity::on_discovery_present(mesh::mesh_message &origin) {
     if (!direct_connection_possible()) {
         return false;
     }
@@ -212,22 +213,27 @@ uint8_t mesh_nrf_connectivity::getPipeByNodeId(const uint8_t &node_id) {
 
 bool mesh_nrf_connectivity::on_discovery_respond(mesh::mesh_message &origin) {
     uint8_t pipe_nr = getPipeByNRFAddress(origin.connectionData[0]);
-    if (pipe_nr == 6 || pipe_addresses[pipe_nr] != 0) {
+    if (pipe_nr == 6 || connections[pipe_nr].getNodeId() != 0 ) {
         return false;
     }
 
-    if (next_pipe < 5) {
-        pipe_addresses[next_pipe] = origin.sender;
-        pipe_nrf_addresses[next_pipe] = origin.connectionData[0];
-
-        rx_pipe(nrf, next_pipe)
-                .setAddress({base_address, pipe_nrf_addresses[next_pipe]})
-                .enabled(true);
-
-
+    uint8_t selected_pipe = getFirstFreePipe();
+    selected_pipe = selected_pipe == 6 ? pipe_nr : selected_pipe;
+    if(selected_pipe == 6) {
+        selected_pipe = pipe_nr;
+    } else {
+        connections[pipe_nr].setConnectionState(mesh::DISCONNECTED);
+        connections[pipe_nr].flush(nrf);
     }
 
-    next_pipe++;
+    mesh_nrf_connection &connection = connections[selected_pipe];
+
+    connection.setConnectionState(mesh::RESPONDED);
+    connection.setChipId(origin.sender);
+    connection.setNrfAddress({base_address, origin.connectionData[0]});
+    connection.flush(nrf);
+
+
     listen();
 
     return true;
