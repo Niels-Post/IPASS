@@ -69,28 +69,36 @@ namespace hwlib_ex {
     void spi_base_bus::write_read(size_t n, const uint8_t *data_out, uint8_t *data_in) {
         uint8_t outbuffer[n];
         uint8_t inbuffer[n];
-        for (size_t i = 0; i < n; i++) {
-            outbuffer[i] = data_out[n - 1 - i];
+        if(data_out != nullptr) {
+            for (size_t i = 0; i < n; i++) {
+                outbuffer[i] = data_out[n - 1 - i];
+            }
         }
 
         write_read_reverse(n, outbuffer, inbuffer);
 
-        for (size_t i = 0; i < n; i++) {
-            data_in[i] = inbuffer[n - 1 - i];
+        if(data_in != nullptr) {
+            for (size_t i = 0; i < n; i++) {
+                data_in[i] = inbuffer[n - 1 - i];
+            }
         }
     }
 
     void spi_base_bus::write_read_reverse(size_t n, const uint8_t *data_out, uint8_t *data_in) {
         uint8_t outbuffer[n];
         uint8_t inbuffer[n];
-        for (size_t i = 0; i < n; i++) {
-            outbuffer[i] = data_out[n - 1 - i];
+        if(data_out != nullptr) {
+            for (size_t i = 0; i < n; i++) {
+                outbuffer[i] = data_out[n - 1 - i];
+            }
         }
 
         write_read(n, outbuffer, inbuffer);
 
-        for (size_t i = 0; i < n; i++) {
-            data_in[i] = inbuffer[n - 1 - i];
+        if(data_in != nullptr) {
+            for (size_t i = 0; i < n; i++) {
+                data_in[i] = inbuffer[n - 1 - i];
+            }
         }
     }
 

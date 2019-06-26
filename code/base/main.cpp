@@ -1,18 +1,11 @@
 #include <hwlib.hpp>
-#include "NRF24L01/nrf24l01plus.hpp"
-#include "NRF_Mesh/mesh_nrf_connectivity.hpp"
-#include "Mesh/router/rip_router.hpp"
+#include "spi/spi_bitbang.hpp"
+#include "nrf24l01/nrf24l01plus.hpp"
+#include "mesh/connectivity/mesh_nrf_connectivity.hpp"
+#include "mesh/router/link_state_router.hpp"
+#include "mesh/mesh_network.hpp"
 
-#include "Mesh/mesh_network.hpp"
-#include "Util/huts.hpp"
-
-using namespace nrf24l01;
-
-
-
-
-
-
+#include "util/cout_debug.hpp"
 
 
 int main() {
@@ -43,6 +36,8 @@ int main() {
         if(count > 500) {
             count = 0;
             net.discover();
+            mesh::mesh_message msg (mesh::DISCOVERY::NO_OPERATION, 0, mesh_connectivity.address, 0, 0);
+            mesh_connectivity.unicast_all(msg);
         }
         if(count == 250) {
 

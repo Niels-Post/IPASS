@@ -9,12 +9,11 @@ namespace hwlib {
 
 }
 
-hwlib_ex::spi_bitbang::spi_bitbang(hwlib::pin_out &_sclk, hwlib::pin_out &_mosi,
-                                   hwlib::pin_in &_miso, hwlib::pin_out &_csn, const hwlib_ex::spi_mode &mode)
+hwlib_ex::spi_bitbang::spi_bitbang(hwlib::pin_out &_sclk, hwlib::pin_out &_mosi, hwlib::pin_in &_miso,
+                                   const hwlib_ex::spi_mode &mode)
         : spi_base_bus(mode), sclk(_sclk),
-          mosi(_mosi), miso(_miso), csn(_csn) {
+          mosi(_mosi), miso(_miso) {
     sclk.write(mode.clock_polarity);
-    csn.write(true);
     mosi.write(false);
 }
 

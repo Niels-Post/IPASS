@@ -5,14 +5,11 @@
 #ifndef IPASS_MESH_NETWORK_HPP
 #define IPASS_MESH_NETWORK_HPP
 
-#include "mesh_message.hpp"
-#include "mesh_router.hpp"
-#include "mesh_connectivity_adapter.hpp"
-#include "../Util/huts.hpp"
+
+#include "../Util/cout_debug.hpp"
 
 namespace mesh {
     class mesh_network {
-        uint8_t current_conversation_id = 0;
         mesh_connectivity_adapter &connection;
         mesh_router &router;
 
@@ -23,19 +20,26 @@ namespace mesh {
                 router(router) {}
 
         void discover() {
-            huts::a_niffau();
-            mesh_message message = {DISCOVERY_PRESENT, ++current_conversation_id, connection.address, 0, 0};
+            mesh_message message = {DISCOVERY::PRESENT, 0, connection.address, 0, 0}; //Todo something with a message id (singleton?)
             connection.broadcast(message);
         }
 
         void update() {
             while (connection.is_message_available()) {
                 mesh_message msg = connection.next_message();
+                if((msg.type & 0x10) > 0) { //This is a routing message
+                    LOG("RECEIVE_ROUTING_MSG");
+                    router.on_routing_message(msg);
+                }
                 if (msg.receiver == connection.address ||
                     msg.receiver == 0) { //Message is for us, or broadcast, take it
                     handleMessage(msg);
                 } else { //Not for us, todo relay message (through routing)
-
+                    uint8_t next_hop = 0;
+                    if(connection.connection_state(msg.receiver) != ACCEPTED) {
+                        next_hop = router.get_next_hop(msg.receiver);
+                    }
+                    connection.unicast(msg);
                 }
 
             }
@@ -45,47 +49,52 @@ namespace mesh {
 
             //todo get router next hop
             uint8_t nextAddress = msg.receiver;
-            if(connection.connection_state(msg.receiver) == ACCEPTED) {
+            if (connection.connection_state(msg.receiver) == ACCEPTED) {
                 connection.unicast(msg, nextAddress);
             }
         }
 
         void handleMessage(mesh_message &msg) {
-            switch (msg.configuration) {
-                case DISCOVERY_PRESENT:
+            switch (msg.type) {
+                case DISCOVERY::PRESENT:
+
                     if (connection.connection_state(msg.sender) == DISCONNECTED) {
-                        //todo implement orderly waiting
                         if (connection.on_discovery_present(msg)) {
-                            huts::a_niffau();
-                            huts::a_niffau();
-                            huts::a_niffau();
-                            mesh_message connectMessage = {DISCOVERY_RESPOND, ++current_conversation_id,
+                            mesh_message connectMessage = {DISCOVERY::RESPOND, 0,
                                                            connection.address,
                                                            msg.sender, 0};
                             connection.unicast(connectMessage);
                         }
-
                     }
                     break;
-                case DISCOVERY_RESPOND: {
+                case DISCOVERY::RESPOND: {
                     if (connection.on_discovery_respond(msg)) {
-                        mesh_message finishMessage = {DISCOVERY_ACCEPT, ++current_conversation_id, connection.address,
+
+                        mesh_message finishMessage = {DISCOVERY::ACCEPT, 0, connection.address,
                                                       msg.sender, 0};
-                        connection.unicast(finishMessage);
+                        if(connection.unicast(finishMessage)) {
+                            LOG2("NEW_CONNECTION", "", hwlib::hex << msg.sender);
+                        } else {
+                            LOG1("ACCEPT_FAIL", hwlib::hex << msg.sender);
+                        }
+
                     } else {
-                        mesh_message finishMessage = {DISCOVERY_DENY, ++current_conversation_id, connection.address,
+                        mesh_message finishMessage = {DISCOVERY::DENY, 0, connection.address,
                                                       msg.sender, 0};
                         connection.unicast(finishMessage);
                     }
                     break;
                 }
-                case DISCOVERY_ACCEPT:
+                case DISCOVERY::ACCEPT:
+                    connection.on_discovery_accept(msg);
+                    LOG2("NEW_CONNECTION", "",  hwlib::hex << msg.sender);
                     break;
-                case DISCOVERY_DENY:
+                case DISCOVERY::DENY:
                     if (msg.receiver == connection.address) {
                         connection.remove_direct_connection(msg.sender);
                     }
                     break;
+                case DISCOVERY::NO_OPERATION:break;
             }
         }
     };

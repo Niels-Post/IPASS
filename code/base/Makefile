@@ -9,7 +9,7 @@
 #############################################################################
 
 # source files in this project (main.cpp is automatically assumed)
-SOURCES := NRF_Mesh/mesh_nrf_connection.cpp NRF_Mesh/mesh_nrf_connectivity.cpp SPI/spi_base.cpp SPI/spi_bitbang.cpp
+SOURCES := mesh/connectivity/mesh_nrf_connection.cpp mesh/connectivity/mesh_nrf_connectivity.cpp spi/spi_base.cpp spi/spi_bitbang.cpp
 
 # header files in this project
 HEADERS :=

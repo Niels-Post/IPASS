@@ -13,10 +13,9 @@ namespace hwlib_ex {
         hwlib::pin_direct_from_out_t sclk;
         hwlib::pin_direct_from_out_t mosi;
         hwlib::pin_direct_from_in_t miso;
-        hwlib::pin_direct_from_out_t csn;
     public:
         spi_bitbang(hwlib::pin_out &_sclk, hwlib::pin_out &_mosi, hwlib::pin_in &_miso,
-                    hwlib::pin_out &_csn, const spi_mode &mode = {});
+                    const hwlib_ex::spi_mode &mode);
 
     protected:
         void wait_half_period();

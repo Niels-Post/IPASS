@@ -3,52 +3,11 @@
 #define PROJECT_NRF24L01_HPP
 
 #include <hwlib.hpp>
-#include "../SPI/spi_bitbang.hpp"
-#include  "NRF24L01_Definitions.hpp"
-
+#include "../spi/spi_base.hpp"
+#include "NRF24L01_Definitions.hpp"
+#include "nrf_address.hpp"
 
 namespace nrf24l01 {
-
-    class nrf_address {
-    public:
-        uint8_t address_bytes[5];
-
-        nrf_address(uint8_t byteAddress[5]) : address_bytes{0} {
-            for (size_t i = 0; i < 5; i++) {
-                address_bytes[i] = byteAddress[i];
-            }
-        }
-
-        nrf_address() : address_bytes{0, 0, 0, 0, 0} {
-
-        }
-
-        nrf_address(const uint8_t &byte_1, const uint8_t &byte_2, const uint8_t &byte_3, const uint8_t &byte_4,
-                    const uint8_t &byte_5) : address_bytes{byte_1, byte_2, byte_3, byte_4, byte_5} {}
-
-        nrf_address(const nrf_address &base, uint8_t end) : address_bytes{0} {
-            for (size_t i = 0; i < 4; i++) {
-                address_bytes[i] = base.address_bytes[i];
-            }
-            address_bytes[4] = end;
-        }
-
-        bool operator==(const nrf_address &rhs) const {
-            for (size_t i = 0; i < 5; i++) {
-                if (address_bytes[i] != rhs.address_bytes[i])
-                    return false;
-            }
-            return false;
-        }
-
-        bool operator==(const uint8_t &rhs) const {
-            return (address_bytes[4] != rhs);
-        }
-
-        bool operator!=(const nrf_address &rhs) const {
-            return !(rhs == *this);
-        }
-    };
 
     /**
      * Interface for the NRF24L01+ NRF tranceiver.
@@ -59,7 +18,7 @@ namespace nrf24l01 {
         hwlib::pin_out &csn;
         hwlib::pin_out &ce;
 
-        uint8_t register_bytes(const uint8_t &address){
+        uint8_t register_bytes(const uint8_t &address) {
             if (address == NRF_REGISTER::RX_ADDR_P0 || address == NRF_REGISTER::RX_ADDR_P1 ||
                 address == NRF_REGISTER::TX_ADDR) {
                 return 5;
@@ -85,8 +44,8 @@ namespace nrf24l01 {
          * @param ce Chip Enable Pin
          */
         nrf24l01plus(hwlib_ex::spi_base_bus &bus, hwlib::pin_out &csn, hwlib::pin_out &ce) : bus(bus),
-                                                                                                           csn(csn),
-                                                                                                           ce(ce), last_status(0) {}
+                                                                                             csn(csn),
+                                                                                             ce(ce), last_status(0) {}
 
         /**
          * \brief
@@ -101,10 +60,10 @@ namespace nrf24l01 {
          * @param lsbyte_first Should the data be read and written LSByte first (reversed)
          */
         void send_command(const uint8_t &command_word, const uint8_t *data_out = nullptr, const uint8_t &n = 0,
-                                        uint8_t *data_in = nullptr, bool lsbyte_first = false) {
+                          uint8_t *data_in = nullptr, bool lsbyte_first = false) {
             auto transaction = bus.transaction(csn);
             transaction.write_read(1, &command_word, &last_status);
-            if(lsbyte_first) {
+            if (lsbyte_first) {
                 transaction.write_read_reverse(n, data_out, data_in);
             } else {
                 transaction.write_read(n, data_out, data_in);
@@ -120,7 +79,8 @@ namespace nrf24l01 {
          * @param lsbyte_first Should the data be read and written LSByte first (reversed)
          */
         template<size_t n>
-        void send_command(const uint8_t &command_word, const std::array<uint8_t, n> & data_out, std::array<uint8_t, n> & data_in, bool lsbyte_first = false) {
+        void send_command(const uint8_t &command_word, const std::array<uint8_t, n> &data_out,
+                          std::array<uint8_t, n> &data_in, bool lsbyte_first = false) {
             send_command(command_word, data_out.begin(), n, data_in.begin(), lsbyte_first);
         }
 
@@ -134,7 +94,7 @@ namespace nrf24l01 {
          * @param in Memory location to read register into
          * @param lsbyte_first Should the data be read LSByte first (reversed)
          */
-        void read_register(const uint8_t &address, uint8_t *in = nullptr, bool lsbyte_first = false){
+        void read_register(const uint8_t &address, uint8_t *in = nullptr, bool lsbyte_first = false) {
             send_command(NRF_INSTRUCTION::R_REGISTER | address, nullptr, register_bytes(address), in, lsbyte_first);
         }
 
@@ -149,7 +109,6 @@ namespace nrf24l01 {
         void read_register(const uint8_t &address, std::array<uint8_t, n> &in, bool lsbyte_first = false) {
             read_register(address, in.begin(), lsbyte_first);
         }
-
 
 
         /**
@@ -191,7 +150,7 @@ namespace nrf24l01 {
         /**
          * No Operation, can be used to retrieve last_status
          */
-        void no_operation(){
+        void no_operation() {
             send_command(NRF_INSTRUCTION::RF24_NOP);
         }
 
@@ -200,7 +159,7 @@ namespace nrf24l01 {
          * @param retry_delay Time to wait before retransmitting (multiplied by 250μs
          * @param retry_count Amount of retries before giving up
          */
-        void auto_retransmit(uint8_t retry_delay, uint8_t retry_count){
+        void auto_retransmit(uint8_t retry_delay, uint8_t retry_count) {
             write_register(NRF_REGISTER::SETUP_RETR, retry_delay << 4 | retry_count);
         }
 
@@ -208,7 +167,7 @@ namespace nrf24l01 {
          * Set RF channel to transmit/receive on
          * @param channel  Channel offset from 2.4gHz (in mHz)
          */
-        void channel(uint8_t channel){
+        void channel(uint8_t channel) {
             write_register(NRF_REGISTER::RF_CH, channel & uint8_t(0xEF));
         }
 
@@ -227,7 +186,7 @@ namespace nrf24l01 {
          * 2: Primary Receive
          * @param newMode
          */
-        void mode(uint8_t newMode){
+        void mode(uint8_t newMode) {
             if (currentMode == newMode) {
                 return;
             }
@@ -268,7 +227,7 @@ namespace nrf24l01 {
          * Power the NRF24L01 chip up or down
          * @param value
          */
-        void power(bool value){
+        void power(bool value) {
             uint8_t lastConfig;
             read_register(NRF_REGISTER::CONFIG, &lastConfig);
             if (value) {
@@ -294,7 +253,7 @@ namespace nrf24l01 {
          * Read width of currently available RX payload
          * @return The length in bytes
          */
-        uint8_t rx_payload_width(){
+        uint8_t rx_payload_width() {
             uint8_t pw;
             send_command(nrf24l01::NRF_INSTRUCTION::R_RX_PL_WID, nullptr, 1, &pw);
             return pw;
@@ -335,7 +294,7 @@ namespace nrf24l01 {
         /**
          * Transmit the first available TX Payload in TX FIFO register
          */
-        void tx_send_payload(){
+        void tx_send_payload() {
             ce.write(true);
             hwlib::wait_us(10);
             ce.write(false);
@@ -348,8 +307,8 @@ namespace nrf24l01 {
          * @param data Memory location to write data from
          * @param size Size of the data to write
          */
-        void tx_write_payload(uint8_t *data, const uint8_t &size, bool noack = false){
-            if(noack) {
+        void tx_write_payload(uint8_t *data, const uint8_t &size, bool noack = false) {
+            if (noack) {
                 send_command(NRF_INSTRUCTION::W_TX_PAYLOAD_NO_ACK, data, size, nullptr);
             } else {
                 send_command(NRF_INSTRUCTION::W_TX_PAYLOAD, data, size, nullptr);
@@ -372,7 +331,7 @@ namespace nrf24l01 {
         /**
          * Clear TX FIFO register
          */
-        void tx_flush(){
+        void tx_flush() {
             send_command(NRF_INSTRUCTION::FLUSH_TX);
         }
 
@@ -404,7 +363,7 @@ namespace nrf24l01 {
         }
 
         void rx_enabled(const bool &value) {
-            nrf.write_register(NRF_REGISTER::EN_RXADDR, uint8_t(value ? 0x3F : 0x00));
+            write_register(NRF_REGISTER::EN_RXADDR, uint8_t(value ? 0x3F : 0x00));
         }
 
         nrf_address rx_get_address(const uint8_t &pipe) {
@@ -422,7 +381,7 @@ namespace nrf24l01 {
         }
 
         void rx_set_address(const uint8_t &pipe, nrf_address &address) {
-            if(pipe > 1) {
+            if (pipe > 1) {
                 write_register(NRF_REGISTER::RX_ADDR_P0 + pipe, address.address_bytes + 4, true);
             } else {
                 write_register(NRF_REGISTER::RX_ADDR_P0 + pipe, address.address_bytes, true);
@@ -448,7 +407,7 @@ namespace nrf24l01 {
         void rx_set_dynamic_payload_length(const uint8_t &pipe, const bool &enabled) {
             uint8_t previousVal;
             read_register(NRF_REGISTER::DYNPD, &previousVal);
-            if (value) {
+            if (enabled) {
                 previousVal |= 1 << pipe;
             } else {
                 previousVal &= ~(1 << pipe);
@@ -456,8 +415,8 @@ namespace nrf24l01 {
             write_register(NRF_REGISTER::DYNPD, &previousVal);
         }
 
-        void rx_set_dynamic_payload_length(const bool & enabled) {
-            write_register(NRF_REGISTER::DYNPD, uint8_t(value ? 0x3F : 0x00));
+        void rx_set_dynamic_payload_length(const bool &enabled) {
+            write_register(NRF_REGISTER::DYNPD, uint8_t(enabled ? 0x3F : 0x00));
         }
 
     };
