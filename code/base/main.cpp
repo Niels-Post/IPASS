@@ -14,34 +14,35 @@ int main() {
     auto sclk = hwlib::target::pin_out(hwlib::target::pins::a3);
     auto mosi = hwlib::target::pin_out(hwlib::target::pins::a4);
     auto miso = hwlib::target::pin_in(hwlib::target::pins::a5);
-    auto bus = hwlib_ex::spi_bitbang(sclk, mosi, miso, csn, hwlib_ex::spi_mode(false, false, 1));
+    auto bus = hwlib_ex::spi_bitbang(sclk, mosi, miso, hwlib_ex::spi_mode(false, false, 1));
+
+    auto nrf = nrf24l01::nrf24l01plus(bus, csn, ce);
+
+    LOG("PROGRAM_STARTING");
 
 
-
-    auto nrf = nrf24l01plus(bus, csn, ce);
-    hwlib::wait_ms(2000);
-    huts::a_niffau();
+    hwlib::wait_ms(100);
     nrf.power(true);
 
+    LOG("NRF_POWER_ON");
 
-    mesh_nrf_connectivity mesh_connectivity(0x8F,nrf);
-    mesh::rip_router router;
+    mesh::mesh_nrf_connectivity mesh_connectivity(0x2F, nrf);
+    mesh::link_state_router router(mesh_connectivity);
 
     mesh::mesh_network net(mesh_connectivity, router);
 
 
     uint64_t count = 0;
-    for(;;) {
+    for (;;) {
         net.update();
-        if(count > 500) {
+        if (count > 500) {
             count = 0;
             net.discover();
             mesh::mesh_message msg (mesh::DISCOVERY::NO_OPERATION, 0, mesh_connectivity.address, 0, 0);
             mesh_connectivity.unicast_all(msg);
         }
-        if(count == 250) {
 
-        }
+
         hwlib::wait_ms(10);
         count++;
     }

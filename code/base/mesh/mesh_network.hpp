@@ -6,13 +6,20 @@
 #define IPASS_MESH_NETWORK_HPP
 
 
-#include "../Util/cout_debug.hpp"
+#include "../util/cout_debug.hpp"
 
 namespace mesh {
     class mesh_network {
         mesh_connectivity_adapter &connection;
         mesh_router &router;
 
+        void on_new_connection(const node_id &id) {
+            LOG2("NEW_CONNECTION", "", hwlib::hex << id);
+        }
+
+        void on_dropped_connection(const node_id &id) {
+            LOG2("DROPPED_CONNECTION", "", hwlib::hex << id);
+        }
     public:
         mesh_network(mesh_connectivity_adapter &connection, mesh_router &router) :
                 connection(
@@ -27,10 +34,6 @@ namespace mesh {
         void update() {
             while (connection.is_message_available()) {
                 mesh_message msg = connection.next_message();
-                if((msg.type & 0x10) > 0) { //This is a routing message
-                    LOG("RECEIVE_ROUTING_MSG");
-                    router.on_routing_message(msg);
-                }
                 if (msg.receiver == connection.address ||
                     msg.receiver == 0) { //Message is for us, or broadcast, take it
                     handleMessage(msg);
@@ -39,7 +42,7 @@ namespace mesh {
                     if(connection.connection_state(msg.receiver) != ACCEPTED) {
                         next_hop = router.get_next_hop(msg.receiver);
                     }
-                    connection.unicast(msg);
+                    connection.unicast(msg, next_hop);
                 }
 
             }
@@ -55,6 +58,10 @@ namespace mesh {
         }
 
         void handleMessage(mesh_message &msg) {
+            if((msg.type & 0x10) > 0) { //This is a routing message
+                LOG("RECEIVE_ROUTING_MSG");
+                router.on_routing_message(msg);
+            }
             switch (msg.type) {
                 case DISCOVERY::PRESENT:
 
@@ -73,7 +80,7 @@ namespace mesh {
                         mesh_message finishMessage = {DISCOVERY::ACCEPT, 0, connection.address,
                                                       msg.sender, 0};
                         if(connection.unicast(finishMessage)) {
-                            LOG2("NEW_CONNECTION", "", hwlib::hex << msg.sender);
+                            on_new_connection(msg.sender);
                         } else {
                             LOG1("ACCEPT_FAIL", hwlib::hex << msg.sender);
                         }
@@ -87,7 +94,7 @@ namespace mesh {
                 }
                 case DISCOVERY::ACCEPT:
                     connection.on_discovery_accept(msg);
-                    LOG2("NEW_CONNECTION", "",  hwlib::hex << msg.sender);
+                    on_new_connection(msg.sender);
                     break;
                 case DISCOVERY::DENY:
                     if (msg.receiver == connection.address) {

@@ -110,7 +110,7 @@ namespace hwlib_ex {
         transaction.csn.write(true);
     }
 
-    spi_mode::spi_mode(uint8_t clockPolarity, bool clockPhase, uint32_t halfTimeNs) : clock_polarity(clockPolarity),
+    spi_mode::spi_mode(bool clockPolarity, bool clockPhase, uint32_t halfTimeNs) : clock_polarity(clockPolarity),
                                                                                       clock_phase(clockPhase),
                                                                                       half_time_ns(halfTimeNs) {}
 

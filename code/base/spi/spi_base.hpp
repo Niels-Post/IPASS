@@ -9,13 +9,13 @@
 
 namespace hwlib_ex {
     struct spi_mode {
-        uint8_t clock_polarity = false;
+        bool clock_polarity = false;
         bool clock_phase = false;
         uint32_t half_time_ns = 1000;
 
         spi_mode();
 
-        spi_mode(uint8_t clockPolarity, bool clockPhase, uint32_t halfTimeNs);
+        spi_mode(bool clockPolarity, bool clockPhase, uint32_t halfTimeNs);
     };
 
     class spi_base_bus {

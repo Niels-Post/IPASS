@@ -7,8 +7,8 @@
 
 
 #include <hwlib.hpp>
-#include "../../NRF24L01/nrf24l01plus.hpp"
-#include "../../NRF24L01/NRF24L01_Definitions.hpp"
+#include "../../nrf24l01/nrf24l01plus.hpp"
+#include "../../nrf24l01/NRF24L01_Definitions.hpp"
 #include "../mesh_definitions.hpp"
 
 namespace mesh {

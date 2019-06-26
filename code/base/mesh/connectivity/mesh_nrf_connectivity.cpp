@@ -51,13 +51,16 @@ namespace mesh {
         }
 
         auto send_pipe = getPipeByNodeId(next_node_id);
-        DEBUG3("Sending Message, type: ", message.type, ", to:  pipe ");
-        DEBUG3(send_pipe, ", node ", message.receiver);
-        DEBUG("\n");
-        if (send_pipe == 6) return false;
+        LOG3("UNICAST_MESSAGE", message.type, message.receiver, send_pipe);
+
+        if (send_pipe == 6) {
+            LOG1("DENY_MESSAGE", "NO_PIPE");
+            return false;
+        }
+
         if (connections[send_pipe].getConnectionState() != mesh::ACCEPTED) {
             if (message.type != DISCOVERY::RESPOND && message.type != DISCOVERY::ACCEPT && message.type != DISCOVERY::DENY) {
-                DEBUG("Connection State invalid: denying send\n");
+                LOG1("DENY_MESSAGE", "NO_ACCEPT");
                 return false;
             }
         }
@@ -73,6 +76,7 @@ namespace mesh {
         if(connections[send_pipe].send_message(connections, nrf, message.size(), data)) {
             return true;
         } else {
+            LOG1("DENY_MESSAGE", "SEND_FAIL");
             remove_direct_connection(message.receiver);
             return false;
         }
@@ -120,7 +124,7 @@ namespace mesh {
 
         nrf.mode(nrf.MODE_NONE);
 
-        mesh_nrf_connection conn = connections[pipe];
+        mesh_nrf_connection &conn = connections[pipe];
         conn.setConnectionState(mesh::DISCONNECTED);
         conn.flush(nrf);
 
@@ -166,7 +170,8 @@ namespace mesh {
     }
 
     void mesh_nrf_connectivity::broadcast(mesh::mesh_message &message) {
-        DEBUG3("Broadcasting Message, type: ", message.type, "\n");
+        if(message.type != 1)
+            LOG1("BROADCAST_MESSAGE", message.type);
 
         uint8_t bcPipe = getPipeByNodeId(0);
         if (bcPipe == 6) {
@@ -195,7 +200,8 @@ namespace mesh {
 
         nrf.write_register(NRF_REGISTER::NRF_STATUS, NRF_STATUS::RX_DR);
 
-        DEBUG3("Received message, type: ", data[0], '\n');
+        if(data[0] != 1)
+            LOG2("RECEIVE_MESSAGE", data[0], data[2]);
         return mesh::mesh_message::parse(payload_width, data);
     }
 
@@ -247,6 +253,7 @@ namespace mesh {
 
         listen();
 
+        connection.setConnectionState(mesh::ACCEPTED);
         return true;
     }
 
@@ -264,8 +271,10 @@ namespace mesh {
     }
 
     void mesh_nrf_connectivity::unicast_all(mesh_message &message) {
+        LOG2("UNICAST_MESSAGE", message.type, message.receiver);
         for (uint8_t pipe = 1; pipe < 6; pipe++) {
             if (connections[pipe].getConnectionState() != mesh::ACCEPTED) {
+                LOG2("NO_CONNECTION", "", hwlib::hex << connections[pipe].getNodeId());
                 continue;
             }
 
@@ -276,7 +285,8 @@ namespace mesh {
             uint8_t data[message.size()];
             message.to_byte_array(data);
             if(!connections[pipe].send_message(connections, nrf, message.size(), data)) {
-                remove_direct_connection(message.receiver);
+                LOG2("REMOVING_CONN", "", connections[pipe].getNodeId());
+                remove_direct_connection(connections[pipe].getNodeId());
             }
         }
     }
