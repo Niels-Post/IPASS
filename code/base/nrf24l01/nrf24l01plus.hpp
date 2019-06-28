@@ -179,6 +179,16 @@ namespace nrf24l01 {
             write_register(NRF_REGISTER::TX_ADDR, address.address_bytes, true);
         }
 
+        nrf_address tx_get_address() {
+            uint8_t data[5];
+            read_register(NRF_REGISTER::TX_ADDR, data);
+            return {data[0], data[1], data[2], data[3], data[4]};
+        }
+
+        uint8_t get_mode() {
+            return currentMode;
+        }
+
         /**
          * Set operating mode:
          * 0: None

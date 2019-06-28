@@ -96,7 +96,7 @@ TEST_CASE("link_state_calculator, edge data is stored with nodes  ") {
 TEST_CASE("link_state_calculator, insert_replace") {
     link_state::link_state_calculator<uint8_t, uint16_t,5,30> calculator(5);
     calculator.insert_replace({3, {1,2,3,4,5}});
-    calculator.insert_replace({2, {5,4,3}});
+    calculator.insert_replace({2, {2,4,6}});
     REQUIRE(calculator.get_node_count() == 3);
     calculator.insert_replace({3, {5,4,3}});
     REQUIRE(calculator.get_node_count() == 3);

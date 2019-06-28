@@ -14,17 +14,18 @@ using nrf24l01::nrf24l01plus;
 using nrf24l01::nrf_address;
 namespace mesh {
 
-    mesh_nrf_connectivity::mesh_nrf_connectivity(uint8_t address, nrf24l01plus &nrf) : mesh_connectivity_adapter(
+
+    mesh_nrf_connectivity::mesh_nrf_connectivity(const node_id &address, nrf24l01plus &nrf) : mesh_connectivity_adapter(
             address),
-                                                                                       connections{
-                                                                                               mesh_nrf_connection(0),
-                                                                                               mesh_nrf_connection(1),
-                                                                                               mesh_nrf_connection(2),
-                                                                                               mesh_nrf_connection(3),
-                                                                                               mesh_nrf_connection(4),
-                                                                                               mesh_nrf_connection(5)
-                                                                                       },
-                                                                                       nrf(nrf) {
+                                                                                              connections{
+                                                                                                      mesh_nrf_pipe(0),
+                                                                                                      mesh_nrf_pipe(1),
+                                                                                                      mesh_nrf_pipe(2),
+                                                                                                      mesh_nrf_pipe(3),
+                                                                                                      mesh_nrf_pipe(4),
+                                                                                                      mesh_nrf_pipe(5)
+                                                                                              },
+                                                                                              nrf(nrf) {
 
 
         nrf.write_register(NRF_REGISTER::FEATURE, NRF_FEATURE::EN_DPL | NRF_FEATURE::EN_DYN_ACK);
@@ -33,122 +34,129 @@ namespace mesh {
         nrf.rx_auto_acknowledgement(true);
         nrf.rx_set_dynamic_payload_length(true);
 
+        nrf.write_register(NRF_REGISTER::SETUP_RETR, 0x0A);
+
+        nrf.write_register(NRF_REGISTER::RF_SETUP, 8);
+
         // Broadcast pipe
-        connections[0].setNodeId(1);
+        connections[0].setNodeId(0);
         connections[0].setNrfAddress(discovery_address);
         connections[0].setConnectionState(mesh::ACCEPTED);
         connections[0].flush(nrf);
 
-        listen();
-
+        start_waiting();
 
         nrf.mode(nrf.MODE_PRX);
     }
 
-    bool mesh_nrf_connectivity::unicast(mesh::mesh_message &message, uint8_t next_node_id) {
-        if (next_node_id == 0) {
-            next_node_id = message.receiver;
+
+    void mesh_nrf_connectivity::add_connection_data(mesh_message &message, node_id &next_hop) {
+        switch (message.type) {
+            case DISCOVERY::RESPOND:
+                message.connectionData[0] = connections[getPipeByNodeId(next_hop)].getNrfAddress().address_bytes[4];
+                break;
+            case DISCOVERY::PRESENT:
+                message.connectionData[0] = connections[getPipeByNodeId(address)].getNrfAddress().address_bytes[4];
+                break;
+            default:
+                break;
         }
+    }
 
-        auto send_pipe = getPipeByNodeId(next_node_id);
-        LOG3("UNICAST_MESSAGE", message.type, message.receiver, send_pipe);
+    bool mesh_nrf_connectivity::send_implementation(node_id &id, uint8_t *data, size_t size) {
+        size_t listen_pipe = getPipeByNodeId(id);
+        return connections[listen_pipe].send_message(connections, nrf, size, data);
+    }
 
-        if (send_pipe == 6) {
-            LOG1("DENY_MESSAGE", "NO_PIPE");
-            return false;
+    mesh::mesh_message mesh_nrf_connectivity::next_message() {
+        buffer_messages();
+        if(buffer_end != buffer_start) {
+            mesh_message &msg = message_buffer[buffer_start++];
+            if(buffer_start == 100) {
+                buffer_start = 0;
+            }
+            return msg;
         }
+        return {};
+    }
 
-        if (connections[send_pipe].getConnectionState() != mesh::ACCEPTED) {
-            if (message.type != DISCOVERY::RESPOND && message.type != DISCOVERY::ACCEPT && message.type != DISCOVERY::DENY) {
-                LOG1("DENY_MESSAGE", "NO_ACCEPT");
-                return false;
+    void mesh_nrf_connectivity::buffer_messages() {
+        while((nrf.fifo_status() & uint8_t (1)) == 0) {
+            uint8_t payload_width = nrf.rx_payload_width();
+            uint8_t data[payload_width];
+            nrf.rx_read_payload(data, payload_width);
+
+
+            nrf.write_register(NRF_REGISTER::NRF_STATUS, NRF_STATUS::RX_DR);
+            message_buffer[buffer_end++].parse(payload_width, data);
+
+            if(buffer_end == 100) {
+                buffer_end = 0;
+            }
+            if(buffer_end == (buffer_start-1)) {
+                LOG("PANIIIIIEK", "Message buffer is vol");
             }
         }
 
-        if (message.type == DISCOVERY::RESPOND) {
-            message.connectionData[0] = connections[getPipeByNodeId(message.receiver)].getNrfAddress().address_bytes[4];
-        }
-
-        uint8_t data[message.size()];
-        message.to_byte_array(data);
-
-
-        if(connections[send_pipe].send_message(connections, nrf, message.size(), data)) {
-            return true;
-        } else {
-            LOG1("DENY_MESSAGE", "SEND_FAIL");
-            remove_direct_connection(message.receiver);
-            return false;
-        }
-
-
-    }
-
-    bool mesh_nrf_connectivity::is_message_available() {
-        nrf.no_operation();
-        return (nrf.last_status & NRF_STATUS::RX_DR) != 0;
     }
 
 
-    bool mesh_nrf_connectivity::direct_connection_possible() {
-        return getFirstFreePipe() != 6;
+    bool mesh_nrf_connectivity::has_message() {
+        buffer_messages();
+        return buffer_start != buffer_end;
     }
 
 
-    bool mesh_nrf_connectivity::on_discovery_present(mesh::mesh_message &origin) {
+    bool mesh_nrf_connectivity::discovery_present_received(mesh::mesh_message &origin) {
         uint8_t freePipe = getFirstFreePipe();
         if (freePipe == 6) {
             return false;
         }
 
-        mesh_nrf_connection &freeConnection = connections[freePipe];
-
-
+        mesh_nrf_pipe &freeConnection = connections[freePipe];
         freeConnection.setNodeId(origin.sender);
         freeConnection.setNrfAddress({base_address, origin.connectionData[0]});
         freeConnection.setConnectionState(mesh::RESPONDED);
-        nrf.mode(nrf.MODE_NONE);
         freeConnection.flush(nrf);
-        nrf.mode(nrf.MODE_PRX);
 
         return true;
     }
 
-
     void mesh_nrf_connectivity::remove_direct_connection(const uint8_t &address) {
-
         uint8_t pipe = getPipeByNodeId(address);
+        LOG("REMOVE_CONNECTION", address << " - " << pipe);
         if (pipe == 6 || pipe == 0) {
             return;
         }
 
-        nrf.mode(nrf.MODE_NONE);
-
-        mesh_nrf_connection &conn = connections[pipe];
+        mesh_nrf_pipe &conn = connections[pipe];
         conn.setConnectionState(mesh::DISCONNECTED);
+        forget_message_history_for(address);
+
         conn.flush(nrf);
 
-        listen();
-        nrf.mode(nrf.MODE_PRX);
+        start_waiting();
     }
 
-    void mesh_nrf_connectivity::listen() {
+
+
+
+    void mesh_nrf_connectivity::start_waiting() {
         // Check if there is a listen pipe already active
-        for (const mesh_nrf_connection &connection : connections) {
-            if (connection.getConnectionState() != mesh::DISCONNECTED && connection.getNodeId() == 0) {
+        for (size_t i = 1; i < 6; i++) {
+            if (connections[i].getConnectionState() == mesh::WAITING) {
                 return;
             }
         }
 
-        for (mesh_nrf_connection &empty_connection : connections) {
+        for (mesh_nrf_pipe &empty_connection : connections) {
             if (empty_connection.getConnectionState() == mesh::DISCONNECTED) {
-
                 nrf_address listenaddress = {base_address, address};
                 bool found = true;
                 while (found) {
                     listenaddress.address_bytes[4] += 2;
                     found = false;
-                    for (mesh_nrf_connection &check_connection : connections) {
+                    for (mesh_nrf_pipe &check_connection : connections) {
                         if (check_connection.getNrfAddress() == listenaddress) {
                             found = true;
                             break;
@@ -157,11 +165,9 @@ namespace mesh {
                 }
 
                 empty_connection.setNrfAddress(listenaddress);
-                empty_connection.setNodeId(0);
+                empty_connection.setNodeId(address);
                 empty_connection.setConnectionState(mesh::WAITING);
-                nrf.mode(nrf.MODE_NONE);
                 empty_connection.flush(nrf);
-                nrf.mode(nrf.MODE_PRX);
                 return;
             }
         }
@@ -169,44 +175,8 @@ namespace mesh {
 
     }
 
-    void mesh_nrf_connectivity::broadcast(mesh::mesh_message &message) {
-        if(message.type != 1)
-            LOG1("BROADCAST_MESSAGE", message.type);
-
-        uint8_t bcPipe = getPipeByNodeId(0);
-        if (bcPipe == 6) {
-            return;
-        }
-        nrf.mode(nrf.MODE_PTX);
-
-        if (message.type == DISCOVERY::PRESENT) {
-            message.connectionData[0] = connections[bcPipe].getNrfAddress().address_bytes[4];
-        }
-
-        uint8_t data[message.size()];
-        message.to_byte_array(data);
-
-        connections[0].send_message(connections, nrf, message.size(), data);
-
-        nrf.mode(nrf.MODE_PRX);
-    }
-
-
-    mesh::mesh_message mesh_nrf_connectivity::next_message() {
-        uint8_t payload_width = nrf.rx_payload_width();
-        uint8_t data[payload_width];
-        nrf.rx_read_payload(data, payload_width);
-
-
-        nrf.write_register(NRF_REGISTER::NRF_STATUS, NRF_STATUS::RX_DR);
-
-        if(data[0] != 1)
-            LOG2("RECEIVE_MESSAGE", data[0], data[2]);
-        return mesh::mesh_message::parse(payload_width, data);
-    }
-
-    mesh::mesh_connection_state mesh_nrf_connectivity::connection_state(const uint8_t &address) {
-        uint8_t pipe = getPipeByNodeId(address);
+    mesh::mesh_connection_state mesh_nrf_connectivity::connection_state(const node_id &id) {
+        size_t pipe = getPipeByNodeId(id);
         return pipe == 6 ? mesh::DISCONNECTED : connections[pipe].getConnectionState();
     }
 
@@ -228,36 +198,33 @@ namespace mesh {
         return 6;
     }
 
-    bool mesh_nrf_connectivity::on_discovery_respond(mesh::mesh_message &origin) {
+    bool mesh_nrf_connectivity::discovery_respond_received(mesh::mesh_message &origin) {
         uint8_t pipe_nr = getPipeByNRFAddress(origin.connectionData[0]);
-        if (pipe_nr == 6 || connections[pipe_nr].getNodeId() != 0) {
+        if (pipe_nr == 6 || connections[pipe_nr].getNodeId() != address) {
             return false;
         }
 
-        uint8_t selected_pipe = getFirstFreePipe();
-        selected_pipe = selected_pipe == 6 ? pipe_nr : selected_pipe;
-        if (selected_pipe == 6) {
-            selected_pipe = pipe_nr;
-        } else {
-            connections[pipe_nr].setConnectionState(mesh::DISCONNECTED);
-            connections[pipe_nr].flush(nrf);
+        if(getPipeByNodeId(origin.sender) != 6) {
+            remove_direct_connection(origin.sender);
         }
 
-        mesh_nrf_connection &connection = connections[selected_pipe];
 
-        connection.setConnectionState(mesh::RESPONDED);
+        mesh_nrf_pipe &connection = connections[pipe_nr];
+
+        LOG("NEW_CONNECTION_IN", origin.sender);
+        connection.setConnectionState(mesh::ACCEPTED);
         connection.setNodeId(origin.sender);
-        connection.setNrfAddress({base_address, origin.connectionData[0]});
         connection.flush(nrf);
 
 
-        listen();
+        start_waiting();
 
-        connection.setConnectionState(mesh::ACCEPTED);
         return true;
     }
 
-    void mesh_nrf_connectivity::on_discovery_accept(mesh::mesh_message &origin) {
+    void mesh_nrf_connectivity::discovery_accept_received(mesh::mesh_message &origin) {
+
+        LOG("NEW_CONNECTION_OUT", origin.sender);
         connections[getPipeByNodeId(origin.sender)].setConnectionState(mesh::ACCEPTED);
     }
 
@@ -270,31 +237,10 @@ namespace mesh {
         return 6;
     }
 
-    void mesh_nrf_connectivity::unicast_all(mesh_message &message) {
-        LOG2("UNICAST_MESSAGE", message.type, message.receiver);
-        for (uint8_t pipe = 1; pipe < 6; pipe++) {
-            if (connections[pipe].getConnectionState() != mesh::ACCEPTED) {
-                LOG2("NO_CONNECTION", "", hwlib::hex << connections[pipe].getNodeId());
-                continue;
-            }
-
-            if (connections[pipe].getNodeId() == message.sender) {
-                continue;
-            }
-
-            uint8_t data[message.size()];
-            message.to_byte_array(data);
-            if(!connections[pipe].send_message(connections, nrf, message.size(), data)) {
-                LOG2("REMOVING_CONN", "", connections[pipe].getNodeId());
-                remove_direct_connection(connections[pipe].getNodeId());
-            }
-        }
-    }
-
     size_t mesh_nrf_connectivity::get_neighbour_count() {
         size_t count = 0;
-        for(mesh_nrf_connection &connection : connections) {
-            if(connection.getConnectionState() == ACCEPTED) {
+        for (size_t i = 1; i < connections.size(); i++) {
+            if (connections[i].getConnectionState() == ACCEPTED) {
                 count++;
             }
         }
@@ -302,11 +248,32 @@ namespace mesh {
     }
 
     void mesh_nrf_connectivity::get_neighbours(uint8_t *data) {
-        for(mesh_nrf_connection &connection : connections) {
-            if(connection.getConnectionState() == ACCEPTED) {
-                *data++ = connection.getNodeId();
+        for (size_t i = 1; i < connections.size(); i++) {
+
+            if (connections[i].getConnectionState() == ACCEPTED) {
+                *data++ = connections[i].getNodeId();
             }
         }
+    }
+
+    void mesh_nrf_connectivity::status() {
+        LOG("Connection status:", "");
+        for(size_t i = 0; i < 6; i++) {
+            LOG(i, connections[i] );
+        }
+
+        nrf_address test = nrf.rx_get_address(0);
+        LOG("RX0", test);
+        test = nrf.tx_get_address();
+        LOG("TX", test);
+        LOG("status", hwlib::bin << nrf.last_status);
+        LOG("fifo", hwlib::bin << nrf.fifo_status());
+        uint8_t dat;
+        nrf.read_register(NRF_REGISTER::EN_RXADDR, &dat);
+        LOG("EN_RX", hwlib::bin << dat);
+
+
+
     }
 }
 

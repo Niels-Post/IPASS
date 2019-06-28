@@ -5,6 +5,8 @@
 #ifndef IPASS_NRF_ADDRESS_HPP
 #define IPASS_NRF_ADDRESS_HPP
 
+#include <ostream>
+
 namespace nrf24l01 {
     class nrf_address {
     public:
@@ -50,6 +52,11 @@ namespace nrf24l01 {
 
         bool operator!=(const nrf_address &rhs) const {
             return !(rhs == *this);
+        }
+
+        friend hwlib::ostream &operator<<(hwlib::ostream &os, const nrf_address &address) {
+            os << "address_bytes: " << hwlib::hex <<  address.address_bytes[0] << " " << address.address_bytes[1] << " " << address.address_bytes[2] << " " << address.address_bytes[3] << " " << address.address_bytes[4] << " " << hwlib::dec;
+            return os;
         }
     };
 }

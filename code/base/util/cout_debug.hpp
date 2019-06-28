@@ -88,10 +88,7 @@ public:
 #define DEBUG_BUILD
 
 #ifdef DEBUG_BUILD
-#define LOG(title) do { auto c = cout_debug(); c << hwlib::left << hwlib::setw(20) << title<< hwlib::endl; } while (0)
-#define LOG1(title, param1) do { auto c = cout_debug(); c << hwlib::left <<  hwlib::setw(20) << title << "type:" << hwlib::setw(10) << param1<< hwlib::endl; } while (0)
-#define LOG2(title, param1, param2) do { auto c = cout_debug(); c << hwlib::left << hwlib::setw(20) << title << "type:" << hwlib::setw(10) << param1 << "node_id:" << hwlib::setw(10) << param2<< hwlib::endl; } while (0)
-#define LOG3(title, param1, param2, param3) do { auto c = cout_debug(); c << hwlib::left << hwlib::setw(20) << title << "type:" << hwlib::setw(10) << param1 << "node_id:" << hwlib::setw(10) << param2 << "pipe:" << hwlib::setw(10) << param3 << hwlib::endl; } while (0)
+#define LOG(title, message) do { auto c = cout_debug(); c << hwlib::left << hwlib::setw(20) << title<< message << hwlib::endl; } while (0)
 #else
 #define LOG(title)
 #define LOG1(title, param1)

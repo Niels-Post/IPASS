@@ -6,14 +6,19 @@
 #define IPASS_MESH_NRF_CONNECTIVITY_HPP
 
 #include <hwlib.hpp>
-#include "../../NRF24L01/nrf24l01plus.hpp"
+#include "../../nrf24l01/nrf24l01plus.hpp"
 #include "../mesh_connectivity_adapter.hpp"
-#include "mesh_nrf_connection.hpp"
+#include "mesh_nrf_pipe.hpp"
 
 namespace mesh {
     class mesh_nrf_connectivity : public mesh::mesh_connectivity_adapter {
     private:
-        std::array<mesh_nrf_connection, 6> connections;
+        std::array<mesh_message, 100> message_buffer = {};
+        size_t buffer_start = 0;
+        size_t buffer_end = 0;
+
+
+        std::array<mesh_nrf_pipe, 6> connections;
         nrf24l01::nrf24l01plus &nrf;
         const nrf24l01::nrf_address discovery_address = {0x70, 0x70, 0x70, 0x70, 0x70};
         const nrf24l01::nrf_address base_address = {0x72, 0x72, 0x72, 0x72, 0x70};
@@ -24,42 +29,42 @@ namespace mesh {
 
         uint8_t getFirstFreePipe();
 
+        void buffer_messages();
+
 
     public:
-        mesh_nrf_connectivity(uint8_t address, nrf24l01::nrf24l01plus &nrf);
+        mesh_nrf_connectivity(const node_id &address, nrf24l01::nrf24l01plus &nrf);
 
 
     private:
-        void listen();
+        void start_waiting();
+
+    protected:
+        bool send_implementation(node_id &id, uint8_t *data, size_t size) override;
 
     public:
 
-
-        void broadcast(mesh::mesh_message &message) override;
-
-        bool unicast(mesh::mesh_message &message, uint8_t next_node_id) override;
-
-        void unicast_all(mesh_message &message) override;
-
-        bool is_message_available() override;
+        bool has_message() override;
 
         mesh::mesh_message next_message() override;
 
-        bool direct_connection_possible() override;
+        mesh::mesh_connection_state connection_state(const uint8_t &id) override;
 
-        mesh::mesh_connection_state connection_state(const uint8_t &address) override;
-
-        bool on_discovery_present(mesh::mesh_message &origin) override;
+        bool discovery_present_received(mesh::mesh_message &origin) override;
 
         void remove_direct_connection(const uint8_t &address) override;
 
-        bool on_discovery_respond(mesh::mesh_message &origin) override;
+        bool discovery_respond_received(mesh::mesh_message &origin) override;
 
-        void on_discovery_accept(mesh::mesh_message &origin) override;
+        void discovery_accept_received(mesh::mesh_message &origin) override;
 
         size_t get_neighbour_count() override;
 
         void get_neighbours(uint8_t *data) override;
+
+        void add_connection_data(mesh_message &message, node_id &next_hop) override;
+
+        void status() override;
     };
 
 }

@@ -6,6 +6,7 @@
 #define IPASS_MESH_MESSAGE_HPP
 
 #include <hwlib.hpp>
+#include <ostream>
 #include "mesh_definitions.hpp"
 
 namespace mesh {
@@ -25,6 +26,8 @@ namespace mesh {
         uint8_t dataSize;
         std::array<uint8_t, 25> data = {0};
         std::array<uint8_t, 2> connectionData = {0};
+
+        mesh_message(): type(0), message_id(0), sender(0), receiver(0), dataSize(0) {}
 
         mesh_message(message_type messageType, uint8_t messageId, node_id sender, node_id receiver, size_t dataSize = 0,
                      const std::array<uint8_t, 25> &data = {0}, const std::array<uint8_t, 2> &connectionData = {0})
@@ -48,20 +51,39 @@ namespace mesh {
             out[size() - 1] = connectionData[1];
         }
 
-        static mesh_message parse(size_t n, const uint8_t in[]) {
+        bool parse(size_t n, const uint8_t in[]) {
+            data.fill(0);
+            connectionData.fill(0);
+
+
             if(n < 7) {
-                return {0, 0, 0, 0, 0};
+                return false;
             }
-            std::array<uint8_t, 25> data = {};
+
+            type = in[0];
+            message_id = in[1];
+            sender = in[2];
+            receiver = in[3];
+            dataSize = in[4];
+
 
             for (size_t i = 0; i < (n - 7); i++) {
                 data[i] = in[i + 5];
             }
-
-            std::array<uint8_t, 2> connectionData = {};
             connectionData[0] = in[n - 2];
             connectionData[1] = in[n - 1];
-            return {in[0], in[1], in[2], in[3], in[4], data, connectionData};
+            return true;
+        }
+
+        friend hwlib::ostream &operator<<(hwlib::ostream &os, const mesh_message &message) {
+            os << "type:" << message.type << " message_id:" << message.message_id << " sender:" << hwlib::hex << message.sender
+               << " receiver: " << message.receiver << " dataSize:" << hwlib::dec << message.dataSize << " connectionData:"
+               << message.connectionData[0] << " - ";
+
+            for(size_t i = 0; i < message.dataSize; i++) {
+                os << message.data[i] << " ";
+            }
+            return os;
         }
 
     };

@@ -4,6 +4,9 @@
 
 #ifndef IPASS_LINK_STATE_CALCULATOR_HPP
 #define IPASS_LINK_STATE_CALCULATOR_HPP
+
+#include <ostream>
+
 namespace link_state {
     template<typename id_type, typename cost_type, size_t max_edges>
     struct link_state_node {
@@ -11,7 +14,7 @@ namespace link_state {
         std::array<id_type, max_edges> edges;
         std::array<cost_type, max_edges> edge_costs = {1};
         uint8_t edge_count = 0;
-        id_type previous_node;
+        id_type previous_node = 0;
         cost_type distance = 0;
         bool shortest_path_known = false;
 
@@ -34,6 +37,17 @@ namespace link_state {
             edge_costs.fill(1);
         }
 
+        friend hwlib::ostream &operator<<(hwlib::ostream &os, const link_state_node &node) {
+            os << "id: " << node.id << " edges: ";
+            for(size_t i = 0; i < node.edge_count; i++) {
+                os << node.edges[i] << "," << node.edge_costs[i] << " ";
+            }
+
+            os << " edge_count: "
+               << node.edge_count << " previous_node: " << node.previous_node << " distance: " << node.distance
+               << " shortest_path_known: " << node.shortest_path_known;
+            return os;
+        }
 
     };
 

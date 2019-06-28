@@ -15,11 +15,10 @@ namespace mesh {
     public:
         mesh_router(mesh_connectivity_adapter &connectivity) : connectivity(connectivity) {}
 
-        virtual void update() = 0;
-        virtual void request_update() = 0;
+        virtual void update_neighbours() = 0;
+        virtual void send_update() = 0;
+        virtual void initial_update() = 0;
         virtual void on_routing_message(mesh_message &message) = 0;
-        virtual void on_neighbour_added(const uint8_t &address)= 0;
-        virtual void on_neighbour_removed(const uint8_t &address) = 0;
 
         virtual node_id get_next_hop(const node_id &receiver) = 0;
     };

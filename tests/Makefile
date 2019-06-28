@@ -9,7 +9,7 @@
 #############################################################################
 
 # source files in this project (main.cpp is automatically assumed)
-SOURCES := TEST_spi_testing.cpp TEST_link_state_calculator.cpp TEST_nrf_address.cpp TEST_nrf24l01plus.cpp TEST_mesh_message.cpp  mesh/connectivity/mesh_nrf_connection.cpp mesh/connectivity/mesh_nrf_connectivity.cpp spi/spi_base.cpp spi/spi_bitbang.cpp
+SOURCES := TEST_spi_testing.cpp TEST_link_state_calculator.cpp TEST_nrf_address.cpp TEST_nrf24l01plus.cpp TEST_mesh_message.cpp  mesh/connectivity/mesh_nrf_pipe.cpp mesh/connectivity/mesh_nrf_connectivity.cpp spi/spi_base.cpp spi/spi_bitbang.cpp
 
 # header files in this project
 HEADERS :=

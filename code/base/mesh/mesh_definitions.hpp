@@ -25,12 +25,12 @@ namespace mesh {
 
     struct LINK_STATE_ROUTING {
         static constexpr const uint8_t UPDATE_REQUEST = 0x10;
-        static constexpr const uint8_t UPDATE_RESPONSE = 0x11;
-        static constexpr const uint8_t UPDATE = 0x12;
-        static constexpr const uint8_t NEW_DIRECT_CONNECTION = 0x13;
-        static constexpr const uint8_t REMOVE_DIRECT_CONNECTION = 0x14;
+        static constexpr const uint8_t UPDATE = 0x11;
     };
 
+    struct DOMOTICA {
+        static constexpr const uint8_t DATA = 0x20;
+    };
 
 }
 

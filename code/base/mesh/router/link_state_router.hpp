@@ -13,34 +13,45 @@ using link_state::link_state_node;
 namespace mesh { //Todo: Pagination for shitloads of nodes
 
     class link_state_router : public mesh_router {
-        uint8_t routing_message_id = 0;
+        bool is_updated = false;
 
         //Link state related
         link_state_calculator<node_id, uint16_t, 5, 10> ls_calc;
 
 
-        uint16_t previous_routing_messages[20] = {0};
-        uint8_t previous_routing_messages_count = 0;
+        void graph_update_other(const node_id &other, const mesh_message &message) {
+            std::array<node_id, 5> edges = {};
+            std::array<uint16_t, 5> costs = {};
 
-        bool is_new_message(const node_id &sender, const uint8_t &message_id) {
-            uint16_t check_value = ((sender << 8) | message_id);
-            for (const uint16_t &i : previous_routing_messages) {
-                if (i == check_value) {
-                    return true;
-                }
+
+            for (size_t i = 0; i < message.dataSize / 2; i++) {
+                edges[i] = message.data[i * 2];
+                costs[i] = message.data[i * 2 + 1];
             }
 
-            if (previous_routing_messages_count == 20) {
-                for (uint8_t i = 0; i < 19; i++) {
-                    previous_routing_messages[i] = previous_routing_messages[i + 1];
-                }
-                previous_routing_messages_count--;
-            }
-            previous_routing_messages[previous_routing_messages_count++] = check_value;
-            return false;
+
+            ls_calc.insert_replace({other, edges, costs});
+            is_updated = false;
         }
 
-        void graph_update_me() {
+        void fill_update_message(mesh_message &message) {
+            auto &me = ls_calc.get_node(0);
+            message.dataSize = uint8_t(me.edge_count * 2);
+            for (size_t i = 0; i < me.edge_count; i++) {
+                message.data[i * 2] = me.edges[i];
+                message.data[i * 2 + 1] = me.edge_costs[i];
+            }
+            is_updated = false;
+        }
+
+    public:
+        link_state_router(mesh_connectivity_adapter &connectivity) : mesh_router(connectivity),
+                                                                     ls_calc(connectivity.address) {
+            update_neighbours();
+        }
+
+        void update_neighbours() override {
+            connectivity.status();
             size_t count = connectivity.get_neighbour_count();
             uint8_t neighbours[count];
             connectivity.get_neighbours(neighbours);
@@ -52,110 +63,72 @@ namespace mesh { //Todo: Pagination for shitloads of nodes
             }
         }
 
-        void graph_update_other(const node_id &other, const mesh_message &message) {
-            std::array<node_id, 5> edges = {};
-            std::array<uint16_t, 5> costs = {};
-
-
-            for (size_t i = 0; i < message.dataSize; i += 2) {
-                edges[i / 2] = message.data[i];
-                costs[i / 2] = message.data[i + 1];
-            }
-
-            ls_calc.insert_replace({other, edges, costs});
-        }
-
-        void fill_update_message(mesh_message &message) {
-            auto& me = ls_calc.get_node(0);
-            message.dataSize = uint8_t(me.edge_count * 2);
-            for (size_t i = 0; i < me.edge_count; i++) {
-                message.data[i * 2] = me.edges[i];
-                message.data[i * 2 + 1] = me.edge_costs[i];
-            }
-        }
-
-    public:
-        link_state_router(mesh_connectivity_adapter &connectivity) : mesh_router(connectivity), ls_calc(connectivity.address) {
-            graph_update_me();
-        }
-
-        void update() override {
+        void send_update() override {
+            update_neighbours();
             mesh_message update_message(
                     LINK_STATE_ROUTING::UPDATE,
-                    routing_message_id++,
+                    0,
                     connectivity.address,
                     0
             );
             fill_update_message(update_message);
-            connectivity.unicast_all(update_message);
+            connectivity.send_all(update_message);
+
         }
 
 
-        void request_update() override {
-            graph_update_me();
+        void initial_update() override {
+            update_neighbours();
             mesh_message message = {
                     LINK_STATE_ROUTING::UPDATE_REQUEST,
-                    routing_message_id++,
+                    0,
                     connectivity.address,
-                    0,
-                    0,
-                    {0}
+                    0
             };
             fill_update_message(message);
-            connectivity.unicast_all(message);
+            connectivity.send_all(message);
         }
 
         void on_routing_message(mesh_message &message) override {
-            if (!is_new_message(message.sender, message.message_id)) { //message already handled
-                return;
-            }
-
             switch (message.type) {
                 case LINK_STATE_ROUTING::UPDATE_REQUEST: {
+                    LOG("RECEIVED INITIAL_UPDATE", "");
+                    graph_update_other(message.sender, message);
+                    cout_debug c;
+                    c << "Current known nodes:" << hwlib::endl;
+                    for (size_t i = 0; i < ls_calc.get_node_count(); i++) {
+                        auto &node = ls_calc.get_node(i);
+                        c << node << hwlib::endl;
+                    }
+                    send_update();
 //                    send_update_response(message);
                     break;
                 }
                 case LINK_STATE_ROUTING::UPDATE: {
+                    LOG("RECEIVED UPDATE", "");
                     graph_update_other(message.sender, message);
+                    cout_debug c;
+                    c << "Current known nodes:" << hwlib::endl;
+                    for (size_t i = 0; i < ls_calc.get_node_count(); i++) {
+                        auto &node = ls_calc.get_node(i);
+                        c << node << hwlib::endl;
+                    }
                     break;
                 }
             }
 
-            if(message.receiver == 0) {
-                connectivity.unicast_all(message);
-            }
-        }
+            connectivity.send_all(message);
 
-
-        void on_neighbour_added(const uint8_t &address) override {
-            mesh_message message = {
-                    LINK_STATE_ROUTING::NEW_DIRECT_CONNECTION,
-                    routing_message_id++,
-                    connectivity.address,
-                    0,
-                    2,
-                    {address, 1} // Todo: Calculate cost
-            };
-
-            connectivity.unicast_all(message);
-        }
-
-        void on_neighbour_removed(const uint8_t &address) override {
-            mesh_message message = {
-                    LINK_STATE_ROUTING::REMOVE_DIRECT_CONNECTION,
-                    routing_message_id++,
-                    connectivity.address,
-                    0,
-                    2,
-                    {0}
-            };
-            message.data[0] = address;
-            message.data[1] = 1;
-
-            connectivity.unicast_all(message);
         }
 
         node_id get_next_hop(const node_id &receiver) override {
+            if (!is_updated) {
+                LOG("RUNNING ALGO", "");
+                is_updated = true;
+                ls_calc.setup();
+                ls_calc.loop();
+            }
+            LOG("ALGO GAAVE", ls_calc.get_next_hop(receiver));
             return ls_calc.get_next_hop(receiver);
         }
 

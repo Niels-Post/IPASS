@@ -6,6 +6,176 @@
 #include "mesh/mesh_network.hpp"
 
 #include "util/cout_debug.hpp"
+#include "domotica/module/rotary_encoder.hpp"
+#include "domotica/domotica_node.hpp"
+#include "domotica/module/led_port.hpp"
+
+
+void onMessage(mesh::mesh_message &msg) {
+
+}
+
+//void run(mesh::node_id id) {
+//
+//
+//
+//    switch (id) {
+//        case 0x10: {
+//            net.add_blacklist<1>({0x20});
+//            auto a = hwlib::target::pin_in(hwlib::target::pins::a9);
+//            auto b = hwlib::target::pin_in(hwlib::target::pins::a10);
+//            rotary_encoder r(2,a,b);
+//            r.filter[0] = 0x30;
+//            uint64_t count = 0;
+//            uint8_t data[4];
+//            for (;;) {
+//                if(r.get_output(data)) {
+//                    mesh::mesh_message msg(
+//                                mesh::DOMOTICA::DATA,
+//                                0,
+//                                0,
+//                                0,
+//                                4
+//                            );
+//                    msg.data[0] = data[0];
+//                    msg.data[1] = data[1];
+//                    msg.data[2] = data[2];
+//                    msg.data[3] = data[3];
+//                    for(uint8_t i = 0; i < 10; i++) {
+//                        if(r.filter[i] == 0) {
+//                            break;
+//                        }
+//                        msg.receiver = r.filter[i];
+//                        net.sendMessage(msg);
+//                    }
+//                }
+//                net.update();
+//                if (count > 5000) {
+//                    count = 0;
+//                    net.discover();
+//                }
+//                hwlib::wait_ms(2);
+//
+//
+//                count++;
+//            }
+//            break;
+//        }
+//        case 0x20: {
+//
+//            net.add_blacklist<2>({0x10, 0x30});
+//            uint64_t count = 0;
+//            for (;;) {
+//                net.update();
+//                if (count > 5000) {
+//                    count = 0;
+//                    net.discover();
+//                }
+//                hwlib::wait_ms(2);
+//
+//
+//                count++;
+//            }
+//        }
+//        case 0x30: {
+//            net.add_blacklist<2>({0x20, 0x40});
+//            uint64_t count = 0;
+//            for (;;) {
+//                net.update();
+//                if (count > 5000) {
+//                    count = 0;
+//                    net.discover();
+//                }
+//                hwlib::wait_ms(2);
+//
+//
+//                count++;
+//            }
+//        }
+//        case 0x40: {
+//            net.add_blacklist<1>({0x30});
+//            uint64_t count = 0;
+//            for (;;) {
+//                net.update();
+//                if (count > 5000) {
+//                    count = 0;
+//                    net.discover();
+//                }
+//                hwlib::wait_ms(2);
+//
+//
+//                count++;
+//            }
+//        }
+//    }
+//}
+
+
+
+void standard(nrf24l01::nrf24l01plus & nrf, mesh::node_id id) {
+    LOG("MY_ID", id);
+    mesh::mesh_nrf_connectivity mesh_connectivity(id, nrf);
+    mesh::link_state_router router(mesh_connectivity);
+    mesh::mesh_network net(mesh_connectivity, router);
+
+    if(id == 0x20) {
+        net.add_blacklist<2>({0x40});
+    }
+    if(id == 0x40) {
+        net.add_blacklist<1>({0x20});
+    }
+
+
+    domotica_input_module d1(0);
+    domotica_output_module d2(0);
+    domotica_node node(net,d1,d2);
+
+
+    node.loop();
+}
+
+
+void rotary(nrf24l01::nrf24l01plus & nrf, mesh::node_id id) {
+    LOG("MY_ID", id);
+    mesh::mesh_nrf_connectivity mesh_connectivity(id, nrf);
+    mesh::link_state_router router(mesh_connectivity);
+    mesh::mesh_network net(mesh_connectivity, router);
+
+    auto a = hwlib::target::pin_in(hwlib::target::pins::a9);
+    auto b = hwlib::target::pin_in(hwlib::target::pins::a10);
+
+    rotary_encoder r(1, a, b);
+    r.filter[0] = 0x30;
+    net.add_blacklist<1>({0x30});
+    domotica_input_module d(0);
+
+    domotica_node node(net,d,r);
+
+    node.loop();
+
+
+}
+
+void port(nrf24l01::nrf24l01plus & nrf, mesh::node_id id) {
+    LOG("MY_ID", id);
+    mesh::mesh_nrf_connectivity mesh_connectivity(id, nrf);
+    mesh::link_state_router router(mesh_connectivity);
+    mesh::mesh_network net(mesh_connectivity, router);
+
+    auto a = hwlib::target::pin_out(hwlib::target::pins::a9);
+    auto b = hwlib::target::pin_out(hwlib::target::pins::a10);
+    auto c = hwlib::target::pin_out(hwlib::target::pins::a11);
+
+    auto port = hwlib::port_out_from(a, b, c);
+
+    net.add_blacklist<1>({0x10});
+    led_port l(2, port);
+    domotica_output_module d(0);
+
+    domotica_node node(net,l,d);
+
+    node.loop();
+}
 
 
 int main() {
@@ -18,34 +188,38 @@ int main() {
 
     auto nrf = nrf24l01::nrf24l01plus(bus, csn, ce);
 
-    LOG("PROGRAM_STARTING");
+
+    LOG("", "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+    LOG("PROGRAM_STARTING", "");
 
 
     hwlib::wait_ms(100);
     nrf.power(true);
 
-    LOG("NRF_POWER_ON");
+    LOG("NRF_POWER_ON", "");
 
-    mesh::mesh_nrf_connectivity mesh_connectivity(0x2F, nrf);
-    mesh::link_state_router router(mesh_connectivity);
+//    rotary(nrf, 0x10);
+//    standard(nrf, 0x20);
+    port(nrf, 0x30);
+//    standard(nrf, 0x40);
 
-    mesh::mesh_network net(mesh_connectivity, router);
+//    run(0x10);
+//    run(0x20);
+//    run(0x30);
+//    run(0x40);
 
+//    auto a = hwlib::target::pin_in(hwlib::target::pins::a9);
+//    auto b = hwlib::target::pin_in(hwlib::target::pins::a10);
+//
+//    rotary_encoder r(1, a, b);
+//    cout_debug c;
+//    uint8_t data[4];
+//    for (;;) {
+//        if (r.get_output(data)) {
+//            c << data[0] << " " << data[1] << " " << data[2] << " " << data[3] << hwlib::endl;
+//        }
+//    }
 
-    uint64_t count = 0;
-    for (;;) {
-        net.update();
-        if (count > 500) {
-            count = 0;
-            net.discover();
-            mesh::mesh_message msg (mesh::DISCOVERY::NO_OPERATION, 0, mesh_connectivity.address, 0, 0);
-            mesh_connectivity.unicast_all(msg);
-        }
-
-
-        hwlib::wait_ms(10);
-        count++;
-    }
 
 //    receive(nrf);
 
