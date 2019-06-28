@@ -9,11 +9,9 @@
 #include "domotica/module/rotary_encoder.hpp"
 #include "domotica/domotica_node.hpp"
 #include "domotica/module/led_port.hpp"
+#include "domotica/module/seven_segment.hpp"
 
 
-void onMessage(mesh::mesh_message &msg) {
-
-}
 
 //void run(mesh::node_id id) {
 //
@@ -166,6 +164,7 @@ void port(nrf24l01::nrf24l01plus & nrf, mesh::node_id id) {
     auto b = hwlib::target::pin_out(hwlib::target::pins::a10);
     auto c = hwlib::target::pin_out(hwlib::target::pins::a11);
 
+
     auto port = hwlib::port_out_from(a, b, c);
 
     net.add_blacklist<1>({0x10});
@@ -178,12 +177,40 @@ void port(nrf24l01::nrf24l01plus & nrf, mesh::node_id id) {
 }
 
 
+void sevensegment(nrf24l01::nrf24l01plus & nrf, mesh::node_id id) {
+    LOG("MY_ID", id);
+    mesh::mesh_nrf_connectivity mesh_connectivity(id, nrf);
+    mesh::link_state_router router(mesh_connectivity);
+    mesh::mesh_network net(mesh_connectivity, router);
+
+    auto _a = hwlib::target::pin_out(hwlib::target::pins::b14);
+    auto _b = hwlib::target::pin_out(hwlib::target::pins::b15);
+    auto _c = hwlib::target::pin_out(hwlib::target::pins::a11);
+    auto _d = hwlib::target::pin_out(hwlib::target::pins::a10);
+    auto _e = hwlib::target::pin_out(hwlib::target::pins::a9);
+    auto _f = hwlib::target::pin_out(hwlib::target::pins::b13);
+    auto _g = hwlib::target::pin_out(hwlib::target::pins::b12);
+
+    auto port = hwlib::port_out_from(_a, _b, _c, _d, _e, _f, _g);
+
+
+    net.add_blacklist<1>({0x10});
+    seven_segment s( 3, port);
+    domotica_output_module d(0);
+
+    domotica_node node(net,s,d);
+
+    node.loop();
+}
+
+
 int main() {
     auto ce = hwlib::target::pin_out(hwlib::target::pins::a1);
     auto csn = hwlib::target::pin_out(hwlib::target::pins::a2);
     auto sclk = hwlib::target::pin_out(hwlib::target::pins::a3);
     auto mosi = hwlib::target::pin_out(hwlib::target::pins::a4);
     auto miso = hwlib::target::pin_in(hwlib::target::pins::a5);
+
     auto bus = hwlib_ex::spi_bitbang(sclk, mosi, miso, hwlib_ex::spi_mode(false, false, 1));
 
     auto nrf = nrf24l01::nrf24l01plus(bus, csn, ce);
@@ -198,10 +225,11 @@ int main() {
 
     LOG("NRF_POWER_ON", "");
 
-//    rotary(nrf, 0x10);
+    rotary(nrf, 0x10);
 //    standard(nrf, 0x20);
-    port(nrf, 0x30);
+//    port(nrf, 0x30);
 //    standard(nrf, 0x40);
+//    sevensegment(nrf, 0x30);
 
 //    run(0x10);
 //    run(0x20);

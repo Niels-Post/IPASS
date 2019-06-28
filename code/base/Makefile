@@ -9,7 +9,7 @@
 #############################################################################
 
 # source files in this project (main.cpp is automatically assumed)
-SOURCES := mesh/connectivity/mesh_nrf_pipe.cpp mesh/connectivity/mesh_nrf_connectivity.cpp spi/spi_base.cpp spi/spi_bitbang.cpp domotica/module/rotary_encoder.cpp domotica/module/led_port.cpp domotica/domotica_module.cpp domotica/domotica_node.cpp
+SOURCES := mesh/connectivity/mesh_nrf_pipe.cpp mesh/connectivity/mesh_nrf_connectivity.cpp spi/spi_base.cpp spi/spi_bitbang.cpp domotica/module/rotary_encoder.cpp domotica/module/led_port.cpp domotica/module/seven_segment.cpp domotica/domotica_module.cpp domotica/domotica_node.cpp
 
 # header files in this project
 HEADERS :=

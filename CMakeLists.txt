@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(WSL_HOMEDIR "L:/HWLib/HWLIB-Cmake-Tools")
+set(WSL_HOMEDIR "C:/Users/niels/Development/WSL_HWLib/HWLIB-Cmake-Tools")
 
 include(${WSL_HOMEDIR}/HWLib_Target.cmake)
 
