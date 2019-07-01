@@ -54,6 +54,7 @@ namespace mesh {
                 nrf.write_register(NRF_REGISTER::NRF_STATUS, 0x10); // Clear Max RT
                 break;
             }
+
         } while ((nrf.last_status & nrf24l01::NRF_STATUS::TX_DS ) == 0);
 
 

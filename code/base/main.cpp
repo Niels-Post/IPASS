@@ -10,103 +10,10 @@
 #include "domotica/domotica_node.hpp"
 #include "domotica/module/led_port.hpp"
 #include "domotica/module/seven_segment.hpp"
+#include "spi/spi_blue_pill.hpp"
 
 
 
-//void run(mesh::node_id id) {
-//
-//
-//
-//    switch (id) {
-//        case 0x10: {
-//            net.add_blacklist<1>({0x20});
-//            auto a = hwlib::target::pin_in(hwlib::target::pins::a9);
-//            auto b = hwlib::target::pin_in(hwlib::target::pins::a10);
-//            rotary_encoder r(2,a,b);
-//            r.filter[0] = 0x30;
-//            uint64_t count = 0;
-//            uint8_t data[4];
-//            for (;;) {
-//                if(r.get_output(data)) {
-//                    mesh::mesh_message msg(
-//                                mesh::DOMOTICA::DATA,
-//                                0,
-//                                0,
-//                                0,
-//                                4
-//                            );
-//                    msg.data[0] = data[0];
-//                    msg.data[1] = data[1];
-//                    msg.data[2] = data[2];
-//                    msg.data[3] = data[3];
-//                    for(uint8_t i = 0; i < 10; i++) {
-//                        if(r.filter[i] == 0) {
-//                            break;
-//                        }
-//                        msg.receiver = r.filter[i];
-//                        net.sendMessage(msg);
-//                    }
-//                }
-//                net.update();
-//                if (count > 5000) {
-//                    count = 0;
-//                    net.discover();
-//                }
-//                hwlib::wait_ms(2);
-//
-//
-//                count++;
-//            }
-//            break;
-//        }
-//        case 0x20: {
-//
-//            net.add_blacklist<2>({0x10, 0x30});
-//            uint64_t count = 0;
-//            for (;;) {
-//                net.update();
-//                if (count > 5000) {
-//                    count = 0;
-//                    net.discover();
-//                }
-//                hwlib::wait_ms(2);
-//
-//
-//                count++;
-//            }
-//        }
-//        case 0x30: {
-//            net.add_blacklist<2>({0x20, 0x40});
-//            uint64_t count = 0;
-//            for (;;) {
-//                net.update();
-//                if (count > 5000) {
-//                    count = 0;
-//                    net.discover();
-//                }
-//                hwlib::wait_ms(2);
-//
-//
-//                count++;
-//            }
-//        }
-//        case 0x40: {
-//            net.add_blacklist<1>({0x30});
-//            uint64_t count = 0;
-//            for (;;) {
-//                net.update();
-//                if (count > 5000) {
-//                    count = 0;
-//                    net.discover();
-//                }
-//                hwlib::wait_ms(2);
-//
-//
-//                count++;
-//            }
-//        }
-//    }
-//}
 
 
 
@@ -116,12 +23,12 @@ void standard(nrf24l01::nrf24l01plus & nrf, mesh::node_id id) {
     mesh::link_state_router router(mesh_connectivity);
     mesh::mesh_network net(mesh_connectivity, router);
 
-    if(id == 0x20) {
-        net.add_blacklist<2>({0x40});
-    }
-    if(id == 0x40) {
-        net.add_blacklist<1>({0x20});
-    }
+//    if(id == 0x20) {
+//        net.add_blacklist<2>({0x40});
+//    }
+//    if(id == 0x40) {
+//        net.add_blacklist<1>({0x20});
+//    }
 
 
     domotica_input_module d1(0);
@@ -142,7 +49,7 @@ void rotary(nrf24l01::nrf24l01plus & nrf, mesh::node_id id) {
     auto a = hwlib::target::pin_in(hwlib::target::pins::a9);
     auto b = hwlib::target::pin_in(hwlib::target::pins::a10);
 
-    rotary_encoder r(1, a, b);
+    rotary_encoder r(1);
     r.filter[0] = 0x30;
     net.add_blacklist<1>({0x30});
     domotica_input_module d(0);
@@ -201,56 +108,29 @@ void sevensegment(nrf24l01::nrf24l01plus & nrf, mesh::node_id id) {
     domotica_node node(net,s,d);
 
     node.loop();
+    EXTI9_5_IRQHandler();
 }
 
 
+
+
+
 int main() {
-    auto ce = hwlib::target::pin_out(hwlib::target::pins::a1);
-    auto csn = hwlib::target::pin_out(hwlib::target::pins::a2);
-    auto sclk = hwlib::target::pin_out(hwlib::target::pins::a3);
-    auto mosi = hwlib::target::pin_out(hwlib::target::pins::a4);
-    auto miso = hwlib::target::pin_in(hwlib::target::pins::a5);
-
-    auto bus = hwlib_ex::spi_bitbang(sclk, mosi, miso, hwlib_ex::spi_mode(false, false, 1));
-
-    auto nrf = nrf24l01::nrf24l01plus(bus, csn, ce);
 
 
+    auto ce = hwlib::target::pin_out(hwlib::target::pins::a4);
+    auto bus = spi_blue_pill({false,false,1});
+    auto nrf = nrf24l01::nrf24l01plus(bus, hwlib::pin_out_dummy, ce);
     LOG("", "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
     LOG("PROGRAM_STARTING", "");
-
-
     hwlib::wait_ms(100);
     nrf.power(true);
-
     LOG("NRF_POWER_ON", "");
-
-    rotary(nrf, 0x10);
+//    rotary(nrf, 0x10);
 //    standard(nrf, 0x20);
+    sevensegment(nrf, 0x30);
 //    port(nrf, 0x30);
 //    standard(nrf, 0x40);
-//    sevensegment(nrf, 0x30);
-
-//    run(0x10);
-//    run(0x20);
-//    run(0x30);
-//    run(0x40);
-
-//    auto a = hwlib::target::pin_in(hwlib::target::pins::a9);
-//    auto b = hwlib::target::pin_in(hwlib::target::pins::a10);
-//
-//    rotary_encoder r(1, a, b);
-//    cout_debug c;
-//    uint8_t data[4];
-//    for (;;) {
-//        if (r.get_output(data)) {
-//            c << data[0] << " " << data[1] << " " << data[2] << " " << data[3] << hwlib::endl;
-//        }
-//    }
-
-
-//    receive(nrf);
-
 
 
 

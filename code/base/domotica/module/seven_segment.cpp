@@ -5,10 +5,6 @@
 
 void seven_segment::set_input(uint8_t *data) {
     uint8_t val = data[0] % 10;
-    LOG("WRITING", map[val]);
-
-
-
     port.write(map[val]);
     port.flush();
 

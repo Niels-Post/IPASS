@@ -23,8 +23,9 @@ void domotica_node::loop() {
         }
 
 
-        for(uint8_t x = 0; x < 15; x++) {
-            if (output_module.get_output(data)) {
+        for(uint8_t x = 0; x < 50; x++) {
+
+            if (output_module.get_output(data, true)) {
                 mesh::mesh_message msg(
                         mesh::DOMOTICA::DATA,
                         0,

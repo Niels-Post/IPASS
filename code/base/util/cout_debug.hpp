@@ -85,15 +85,12 @@ public:
 
 
 
-#define DEBUG_BUILD
+//#define DEBUG_BUILD
 
 #ifdef DEBUG_BUILD
 #define LOG(title, message) do { auto c = cout_debug(); c << hwlib::left << hwlib::setw(20) << title<< message << hwlib::endl; } while (0)
 #else
-#define LOG(title)
-#define LOG1(title, param1)
-#define LOG2(title, param1, param2)
-#define LOG3(title, param1, param2, param3)
+#define LOG(title, message)
 #endif
 
 

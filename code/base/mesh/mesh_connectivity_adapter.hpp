@@ -84,15 +84,16 @@ namespace mesh {
 
 
             LOG("Sending", message);
-
             uint8_t message_bytes[message.size()];
             message.to_byte_array(message_bytes);
 
-
             for(uint8_t fail_count = 0; fail_count < 5; fail_count++) {
+
                 if(send_implementation(next_hop, message_bytes, message.size())) {
+
                     return true;
                 }
+
                 hwlib::wait_ms(1);
                 has_message();
 
