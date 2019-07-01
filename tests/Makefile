@@ -9,7 +9,7 @@
 #############################################################################
 
 # source files in this project (main.cpp is automatically assumed)
-SOURCES := TEST_spi_testing.cpp TEST_link_state_calculator.cpp TEST_nrf_address.cpp TEST_nrf24l01plus.cpp TEST_mesh_message.cpp  mesh/connectivity/mesh_nrf_pipe.cpp mesh/connectivity/mesh_nrf_connectivity.cpp spi/spi_base.cpp spi/spi_bitbang.cpp
+SOURCES := TEST_spi_testing.cpp TEST_link_state_calculator.cpp TEST_nrf_address.cpp TEST_nrf24l01plus.cpp TEST_mesh_message.cpp  mesh/connectivity/mesh_nrf_pipe.cpp mesh/connectivity/mesh_nrf_connectivity.cpp spi/spi_base.cpp spi/spi_bitbang.cpp spi/spi_blue_pill.cpp domotica/module/rotary_encoder.cpp domotica/module/led_port.cpp domotica/module/seven_segment.cpp domotica/domotica_module.cpp domotica/domotica_node.cpp link_state/calculator.cpp link_state/node.cpp mesh/router/link_state_router.cpp mesh/connectivity_adapter.cpp
 
 # header files in this project
 HEADERS :=

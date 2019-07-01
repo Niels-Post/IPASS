@@ -1,12 +1,11 @@
 #include <hwlib.hpp>
 
 
-
 int main() {
     auto led = hwlib::target::pin_out(hwlib::target::pins::led);
     hwlib::blink(led);
 
-    auto bus =hwlib::i2c_bus_bit_banged_scl_sda(hwlib::pin_oc_dummy, hwlib::pin_oc_dummy);
+    auto bus = hwlib::i2c_bus_bit_banged_scl_sda(hwlib::pin_oc_dummy, hwlib::pin_oc_dummy);
 }
 
 

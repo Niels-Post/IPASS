@@ -6,6 +6,7 @@
 #include "nrf24l01/nrf_address.hpp"
 
 using nrf24l01::nrf_address;
+
 TEST_CASE("nrf_address") {
     hwlib::cout << "Testing nrf_address" << hwlib::endl;
 }
@@ -14,13 +15,13 @@ TEST_CASE("nrf_address, empty constructor") {
 
     nrf_address empty_constructor;
 
-    for(uint8_t address_byte : empty_constructor.address_bytes) {
+    for (uint8_t address_byte : empty_constructor.address_bytes) {
         REQUIRE(address_byte == 0);
     }
 }
 
 TEST_CASE("nrf_address, 5 argument constructor") {
-    nrf_address constructor_5(2,4,6,8,10);
+    nrf_address constructor_5(2, 4, 6, 8, 10);
     REQUIRE(constructor_5.address_bytes[0] == 2);
     REQUIRE(constructor_5.address_bytes[1] == 4);
     REQUIRE(constructor_5.address_bytes[2] == 6);
@@ -46,7 +47,6 @@ TEST_CASE("nrf_address, equality rhs nrf_address") {
     nrf_address address3 = {0x48, 0x50, 0x00, 0x54, 0x56};
 
 
-
     CHECK(address1 == address2);
     CHECK(!(address1 == address3));
 }
@@ -64,7 +64,6 @@ TEST_CASE("nrf_address, inequality rhs nrf_address") {
 
 TEST_CASE("nrf_address, equality rhs uint8_t") {
     auto base_address = nrf_address(0x48, 0x50, 0x52, 0x54, 0x56);
-
 
 
     REQUIRE(base_address == 0x56);

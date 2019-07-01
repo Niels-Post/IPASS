@@ -3,14 +3,14 @@
 //
 
 #include "catch.hpp"
-#include "mesh/mesh_message.hpp"
+#include "mesh/message.hpp"
 
-TEST_CASE("mesh_message") {
-hwlib::cout << "Testing mesh_message" << hwlib::endl;
+TEST_CASE("message") {
+    hwlib::cout << "Testing message" << hwlib::endl;
 }
 
-TEST_CASE("mesh_message, constructor") {
-    mesh::mesh_message msg = {0x02, 0x04, 0x06, 0x08, 0x0A};
+TEST_CASE("message, constructor") {
+    mesh::message msg = {0x02, 0x04, 0x06, 0x08, 0x0A};
 
     REQUIRE(msg.type == 0x02);
     REQUIRE(msg.message_id == 0x04);
@@ -21,19 +21,19 @@ TEST_CASE("mesh_message, constructor") {
     REQUIRE(msg.connectionData[1] == 0x00);
 }
 
-TEST_CASE("mesh_message, size no payload") {
-    mesh::mesh_message msg = {0x02, 0x04, 0x06, 0x08, 0x00};
+TEST_CASE("message, size no payload") {
+    mesh::message msg = {0x02, 0x04, 0x06, 0x08, 0x00};
     REQUIRE(msg.size() == 7);
 }
 
-TEST_CASE("mesh_message, size with payload") {
-    mesh::mesh_message msg = {0x02, 0x04, 0x06, 0x08, 0x0A};
+TEST_CASE("message, size with payload") {
+    mesh::message msg = {0x02, 0x04, 0x06, 0x08, 0x0A};
     REQUIRE(msg.size() == 17);
 }
 
 
-TEST_CASE("mesh_message, to_byte_array no payload") {
-    mesh::mesh_message msg = {0x02, 0x04, 0x06, 0x08, 0x00};
+TEST_CASE("message, to_byte_array no payload") {
+    mesh::message msg = {0x02, 0x04, 0x06, 0x08, 0x00};
 
     uint8_t data[msg.size()];
 
@@ -48,8 +48,8 @@ TEST_CASE("mesh_message, to_byte_array no payload") {
     REQUIRE(data[6] == 0x00);
 }
 
-TEST_CASE("mesh_message, to_byte_array with payload") {
-    mesh::mesh_message msg = {0x02, 0x04, 0x06, 0x08, 0x02};
+TEST_CASE("message, to_byte_array with payload") {
+    mesh::message msg = {0x02, 0x04, 0x06, 0x08, 0x02};
 
     msg.data[0] = 0x0C;
     msg.data[1] = 0x0E;
@@ -70,10 +70,11 @@ TEST_CASE("mesh_message, to_byte_array with payload") {
 }
 
 
-TEST_CASE("mesh_message, parse without payload") {
+TEST_CASE("message, parse without payload") {
     uint8_t data[7] = {0x03, 0x05, 0x07, 0x09, 0x00, 0x0D, 0x0F};
 
-    mesh::mesh_message msg = mesh::mesh_message::parse(7, data);
+    mesh::message msg;
+    msg.parse(7,data);
     REQUIRE(msg.type == 0x03);
     REQUIRE(msg.message_id == 0x05);
     REQUIRE(msg.sender == 0x07);
@@ -83,10 +84,11 @@ TEST_CASE("mesh_message, parse without payload") {
     REQUIRE(msg.connectionData[1] == 0x0F);
 }
 
-TEST_CASE("mesh_message, parse with payload") {
+TEST_CASE("message, parse with payload") {
     uint8_t data[9] = {0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A};
 
-    mesh::mesh_message msg = mesh::mesh_message::parse(9, data);
+    mesh::message msg;
+    msg.parse(9, data);
     REQUIRE(msg.type == 0x02);
     REQUIRE(msg.message_id == 0x03);
     REQUIRE(msg.sender == 0x04);

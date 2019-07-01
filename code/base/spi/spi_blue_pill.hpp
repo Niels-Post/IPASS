@@ -4,10 +4,11 @@
 
 #ifndef IPASS_SPI_BLUE_PILL_HPP
 #define IPASS_SPI_BLUE_PILL_HPP
+
 #include <hwlib.hpp>
 #include "spi_base.hpp"
 
-class spi_blue_pill: public hwlib_ex::spi_base_bus {
+class spi_blue_pill : public hwlib_ex::spi_base_bus {
     bool start;
     uint8_t data_out_empty[32] = {0};
 

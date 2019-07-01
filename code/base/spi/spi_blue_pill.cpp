@@ -3,7 +3,6 @@
 //
 
 #include "spi_blue_pill.hpp"
-#include "../util/cout_debug.hpp"
 
 void spi_blue_pill::write_read(size_t n, const uint8_t *data_out, uint8_t *data_in) {
 

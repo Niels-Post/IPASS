@@ -9,7 +9,6 @@
 #include <hwlib.hpp>
 
 
-
 #define DEBUG_UART
 
 #ifdef DEBUG_SPI
@@ -42,6 +41,7 @@ public:
 #endif
 
 #ifdef DEBUG_UART
+
 class cout_debug : public hwlib::ostream {
     hwlib::target::pin_out uart;
 
@@ -59,6 +59,7 @@ public:
 
     }
 };
+
 #endif
 
 

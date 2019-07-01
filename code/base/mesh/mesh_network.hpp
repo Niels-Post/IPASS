@@ -7,13 +7,13 @@
 
 
 #include "../util/cout_debug.hpp"
-#include "mesh_connectivity_adapter.hpp"
-#include "mesh_router.hpp"
+#include "connectivity_adapter.hpp"
+#include "router.hpp"
 
 namespace mesh {
     class mesh_network {
-        mesh_connectivity_adapter &connection;
-        mesh_router &router;
+        connectivity_adapter &connection;
+        router &network_router;
 
         std::array<node_id, 10> blacklist = {0};
         size_t blacklist_size = 0;
@@ -35,49 +35,48 @@ namespace mesh {
         }
 
 
-
     public:
-        mesh_network(mesh_connectivity_adapter &connection, mesh_router &router) :
+        mesh_network(connectivity_adapter &connection, router &networkrouter) :
                 connection(
                         connection),
-                router(router) {}
+                network_router(networkrouter) {}
 
-        template <size_t n>
-        void add_blacklist(std::array<node_id,n> list) {
-            for(const node_id &node: list) {
+        template<size_t n>
+        void add_blacklist(std::array<node_id, n> list) {
+            for (const node_id &node: list) {
                 blacklist[blacklist_size++] = node;
             }
         }
 
         void discover() {
-            mesh_message message = {DISCOVERY::PRESENT, 0, connection.address, 0,
+            message message = {DISCOVERY::PRESENT, 0, connection.address, 0,
                                     0}; //Todo something with a message id (singleton?)
             connection.send(message);
         }
 
-        uint8_t check_new_messages(std::array<mesh_message, 10> &uncaught) {
+        uint8_t check_new_messages(std::array<message, 10> &uncaught) {
             uint8_t index = 0;
             while (connection.has_message()) {
-                mesh_message msg = connection.next_message();
+                message msg = connection.next_message();
                 if (!connection.is_new_message(msg)) { //message already handled
                     continue;
                 }
                 LOG("Received ", msg);
                 if (msg.receiver == connection.address ||
                     msg.receiver == 0) { //Message is for us, or broadcast, take it
-                    if(!handleMessage(msg) ) {
+                    if (!handleMessage(msg)) {
                         uncaught[index++] = msg;
                     }
                 } else { //Not for us, todo relay message (through routing)
                     uint8_t next_hop = 0;
                     if (connection.connection_state(msg.receiver) != ACCEPTED) {
                         LOG("NOT DIRECT, GETTING NEXT HOP", "");
-                        next_hop = router.get_next_hop(msg.receiver);
+                        next_hop = network_router.get_next_hop(msg.receiver);
                     } else {
                         LOG("DIRECT AF, GETTING NEXT HOP", "");
                     }
-                    if(!connection.send(msg, next_hop)) {
-                        router.update_neighbours();
+                    if (!connection.send(msg, next_hop)) {
+                        network_router.update_neighbours();
                     }
                 }
 
@@ -93,7 +92,7 @@ namespace mesh {
 
             if (update_count++ > keepalive_interval) {
                 update_count = 0;
-                mesh_message keepalive = {
+                message keepalive = {
                         DISCOVERY::NO_OPERATION,
                         0,
                         connection.address,
@@ -106,48 +105,48 @@ namespace mesh {
             }
         }
 
-        void unicast_close_if_fail(mesh_message &msg, const node_id &next_hop = 0) {
+        void unicast_close_if_fail(message &msg, const node_id &next_hop = 0) {
             if (!connection.send(msg, next_hop)) {
                 connection.remove_direct_connection(next_hop != 0 ? next_hop : msg.receiver);
-                router.send_update();
+                network_router.send_update();
             }
         }
 
-        void unicast_all_close_if_fail(mesh_message &msg) {
+        void unicast_all_close_if_fail(message &msg) {
             node_id failed[connection.get_neighbour_count()];
 
-            if(!connection.send_all(msg, failed)) {
-                for(size_t i = 0; i < connection.get_neighbour_count(); i++) {
-                    if(failed[i] == 0) {
+            if (!connection.send_all(msg, failed)) {
+                for (size_t i = 0; i < connection.get_neighbour_count(); i++) {
+                    if (failed[i] == 0) {
                         continue;
                     }
                     LOG("FAILED", failed[i]);
-                    connection.remove_direct_connection(failed[i] );
+                    connection.remove_direct_connection(failed[i]);
                 }
-                router.send_update();
+                network_router.send_update();
             }
         }
 
-        void sendMessage(mesh_message &msg) {
-            uint8_t nextAddress = router.get_next_hop(msg.receiver);
+        void sendMessage(message &msg) {
+            uint8_t nextAddress = network_router.get_next_hop(msg.receiver);
             msg.sender = connection.address;
             LOG("SENDING", msg);
-            if(!connection.send(msg, nextAddress)) {
+            if (!connection.send(msg, nextAddress)) {
                 // Todo actual error handling
 //                router.update_neighbours();
             }
         }
 
-        bool handleMessage(mesh_message &msg) {
+        bool handleMessage(message &msg) {
             if ((msg.type & 0x10) > 0) { //This is a routing message
-                router.on_routing_message(msg);
+                network_router.on_routing_message(msg);
             }
 
-            if((msg.type & 0x20) > 0) {
+            if ((msg.type & 0x20) > 0) {
                 return false;
             }
 
-            if(is_blacklisted(msg.sender)) {
+            if (is_blacklisted(msg.sender)) {
                 return true;
             }
 
@@ -156,7 +155,7 @@ namespace mesh {
                 case DISCOVERY::PRESENT:
                     if (connection.connection_state(msg.sender) == DISCONNECTED) {
                         if (connection.discovery_present_received(msg)) {
-                            mesh_message connectMessage = {DISCOVERY::RESPOND, 0,
+                            message connectMessage = {DISCOVERY::RESPOND, 0,
                                                            connection.address,
                                                            msg.sender, 0};
                             unicast_close_if_fail(connectMessage);
@@ -166,14 +165,14 @@ namespace mesh {
                 case DISCOVERY::RESPOND: {
                     if (connection.discovery_respond_received(msg)) {
 
-                        mesh_message finishMessage = {DISCOVERY::ACCEPT, 0, connection.address,
+                        message finishMessage = {DISCOVERY::ACCEPT, 0, connection.address,
                                                       msg.sender, 0};
                         if (connection.send(finishMessage)) {
-                            router.update_neighbours();
+                            network_router.update_neighbours();
                         }
 
                     } else {
-                        mesh_message finishMessage = {DISCOVERY::DENY, 0, connection.address,
+                        message finishMessage = {DISCOVERY::DENY, 0, connection.address,
                                                       msg.sender, 0};
                         connection.send(finishMessage);
                     }
@@ -181,7 +180,7 @@ namespace mesh {
                 }
                 case DISCOVERY::ACCEPT:
                     connection.discovery_accept_received(msg);
-                    router.initial_update();
+                    network_router.initial_update();
                     break;
                 case DISCOVERY::DENY:
                     if (msg.receiver == connection.address) {

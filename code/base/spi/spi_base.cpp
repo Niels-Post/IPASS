@@ -69,7 +69,7 @@ namespace hwlib_ex {
     void spi_base_bus::write_read(size_t n, const uint8_t *data_out, uint8_t *data_in) {
         uint8_t outbuffer[n];
         uint8_t inbuffer[n];
-        if(data_out != nullptr) {
+        if (data_out != nullptr) {
             for (size_t i = 0; i < n; i++) {
                 outbuffer[i] = data_out[n - 1 - i];
             }
@@ -77,7 +77,7 @@ namespace hwlib_ex {
 
         write_read_reverse(n, outbuffer, inbuffer);
 
-        if(data_in != nullptr) {
+        if (data_in != nullptr) {
             for (size_t i = 0; i < n; i++) {
                 data_in[i] = inbuffer[n - 1 - i];
             }
@@ -87,7 +87,7 @@ namespace hwlib_ex {
     void spi_base_bus::write_read_reverse(size_t n, const uint8_t *data_out, uint8_t *data_in) {
         uint8_t outbuffer[n];
         uint8_t inbuffer[n];
-        if(data_out != nullptr) {
+        if (data_out != nullptr) {
             for (size_t i = 0; i < n; i++) {
                 outbuffer[i] = data_out[n - 1 - i];
             }
@@ -95,7 +95,7 @@ namespace hwlib_ex {
 
         write_read(n, outbuffer, inbuffer);
 
-        if(data_in != nullptr) {
+        if (data_in != nullptr) {
             for (size_t i = 0; i < n; i++) {
                 data_in[i] = inbuffer[n - 1 - i];
             }
@@ -111,8 +111,8 @@ namespace hwlib_ex {
     }
 
     spi_mode::spi_mode(bool clockPolarity, bool clockPhase, uint32_t halfTimeNs) : clock_polarity(clockPolarity),
-                                                                                      clock_phase(clockPhase),
-                                                                                      half_time_ns(halfTimeNs) {}
+                                                                                   clock_phase(clockPhase),
+                                                                                   half_time_ns(halfTimeNs) {}
 
     spi_mode::spi_mode() = default;
 }

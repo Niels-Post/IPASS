@@ -19,7 +19,7 @@ TEST_CASE("spi_testing, SPI test bus can test write operations") {
     test_write.transaction(hwlib::pin_out_dummy).write(10, data);
 
     REQUIRE(test_write.out_buffer_size == 10);
-    for(size_t i =0; i < 10; i++) {
+    for (size_t i = 0; i < 10; i++) {
         REQUIRE(data[i] == test_write.out_buffer[i]);
     }
 }
@@ -43,7 +43,7 @@ TEST_CASE("spi_testing, SPI test bus can test read operations") {
     std::array<uint8_t, 10> prepared_data = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18};
     test_read.append_in_buffer(prepared_data);
 
-    uint8_t read_data[10] ={0};
+    uint8_t read_data[10] = {0};
 
     REQUIRE(test_read.in_buffer_index == 0);
     test_read.transaction(hwlib::pin_out_dummy).write_read(10, nullptr, read_data);
@@ -51,7 +51,7 @@ TEST_CASE("spi_testing, SPI test bus can test read operations") {
 
     REQUIRE(test_read.in_buffer_size == 10);
     REQUIRE(test_read.in_buffer_index == 10);
-    for(size_t i =0; i < 10; i++) {
+    for (size_t i = 0; i < 10; i++) {
         REQUIRE(prepared_data[i] == read_data[i]);
     }
 }

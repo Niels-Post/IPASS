@@ -8,7 +8,7 @@
 #include "pin_debug.hpp"
 
 TEST_CASE("nrf24l01plus") {
-hwlib::cout << "Testing nrf24l01plus" << hwlib::endl;
+    hwlib::cout << "Testing nrf24l01plus" << hwlib::endl;
 }
 
 TEST_CASE("nrf24l01plus, register bytes") {
@@ -37,7 +37,7 @@ TEST_CASE("nrf24l01plus, command, writing payload") {
     uint8_t data[2] = {0x02, 0x04};
 
 
-    nrf.send_command(0xFF, data , 2);
+    nrf.send_command(0xFF, data, 2);
 
     REQUIRE(spi.out_buffer_size == 3);
     REQUIRE(spi.out_buffer[0] == 0xFF);
@@ -51,7 +51,7 @@ TEST_CASE("nrf24l01plus, command, writing payload reversed") {
 
     uint8_t data[2] = {0x03, 0x05};
 
-    nrf.send_command(0x00, data , 2, nullptr, true);
+    nrf.send_command(0x00, data, 2, nullptr, true);
 
     REQUIRE(spi.out_buffer_size == 3);
     REQUIRE(spi.out_buffer[0] == 0x00);
@@ -69,7 +69,7 @@ TEST_CASE("nrf24l01plus, command, reading payload") {
 
     uint8_t data[3] = {0};
 
-    nrf.send_command(0x00, nullptr , 3, data);
+    nrf.send_command(0x00, nullptr, 3, data);
 
     REQUIRE(spi.in_buffer_size == 4);
     REQUIRE(nrf.last_status == 0x02);
@@ -88,7 +88,7 @@ TEST_CASE("nrf24l01plus, command, reading payload reversed") {
 
     uint8_t data[3] = {0};
 
-    nrf.send_command(0x00, nullptr , 3, data, true);
+    nrf.send_command(0x00, nullptr, 3, data, true);
 
     REQUIRE(spi.in_buffer_size == 4);
     REQUIRE(nrf.last_status == 0x02);
@@ -175,12 +175,12 @@ TEST_CASE("nrf24l01plus, setting rx_address can set a 5 byte address, and does s
     auto spi = spi_testing();
     auto nrf = nrf24l01::nrf24l01plus(spi, hwlib::pin_out_dummy, hwlib::pin_out_dummy);
 
-    nrf24l01::nrf_address address = {0x02,0x04,0x06,0x08,0x0A};
+    nrf24l01::nrf_address address = {0x02, 0x04, 0x06, 0x08, 0x0A};
     nrf.rx_set_address(0, address);
 
     REQUIRE(spi.out_buffer_size == 6);
-    for(size_t i = 0; i < 5; i++) {
-        REQUIRE(spi.out_buffer[i + 1] == address.address_bytes[4-i]);
+    for (size_t i = 0; i < 5; i++) {
+        REQUIRE(spi.out_buffer[i + 1] == address.address_bytes[4 - i]);
     }
 }
 
@@ -188,7 +188,7 @@ TEST_CASE("nrf24l01plus, setting rx_address can set a 1 byte address") {
     auto spi = spi_testing();
     auto nrf = nrf24l01::nrf24l01plus(spi, hwlib::pin_out_dummy, hwlib::pin_out_dummy);
 
-    nrf24l01::nrf_address address = {0x02,0x04,0x06,0x08,0x0A};
+    nrf24l01::nrf_address address = {0x02, 0x04, 0x06, 0x08, 0x0A};
     nrf.rx_set_address(2, address);
 
     REQUIRE(spi.out_buffer_size == 2);
@@ -199,7 +199,7 @@ TEST_CASE("nrf24l01, setting rx_address writes to the correct registers") {
     auto spi = spi_testing();
     auto nrf = nrf24l01::nrf24l01plus(spi, hwlib::pin_out_dummy, hwlib::pin_out_dummy);
 
-    nrf24l01::nrf_address address = {0x02,0x04,0x06,0x08,0x0A};
+    nrf24l01::nrf_address address = {0x02, 0x04, 0x06, 0x08, 0x0A};
 
     nrf.rx_set_address(0, address);
     REQUIRE(spi.out_buffer[0] == (nrf24l01::NRF_INSTRUCTION::W_REGISTER | nrf24l01::NRF_REGISTER::RX_ADDR_P0));

@@ -63,7 +63,7 @@ namespace nrf24l01 {
                           uint8_t *data_in = nullptr, bool lsbyte_first = false) {
             auto transaction = bus.transaction(csn);
             transaction.write_read(1, &command_word, &last_status);
-            if(n == 0) {
+            if (n == 0) {
                 return;
             }
             if (lsbyte_first) {

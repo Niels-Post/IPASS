@@ -9,7 +9,7 @@
 #############################################################################
 
 # source files in this project (main.cpp is automatically assumed)
-SOURCES := vtable.S mesh/connectivity/mesh_nrf_pipe.cpp mesh/connectivity/mesh_nrf_connectivity.cpp spi/spi_base.cpp spi/spi_bitbang.cpp spi/spi_blue_pill.cpp domotica/module/rotary_encoder.cpp domotica/module/led_port.cpp domotica/module/seven_segment.cpp domotica/domotica_module.cpp domotica/domotica_node.cpp
+SOURCES := domotica/module.cpp domotica/module/led_port.cpp domotica/module/rotary_encoder.cpp domotica/module/seven_segment.cpp domotica/node.cpp mesh/connectivity/nrf.cpp mesh/connectivity/nrf_pipe.cpp mesh/connectivity_adapter.cpp mesh/router/link_state_router.cpp spi/spi_base.cpp spi/spi_bitbang.cpp spi/spi_blue_pill.cpp vtable.asm
 
 # header files in this project
 HEADERS :=
@@ -39,6 +39,6 @@ include $(HWLIB)/makefile.inc
 BMPTK             ?= $(HOME)/bmptk
 include $(BMPTK)/Makefile.inc
 
-
 debugtarget:
 	$(info    $(DEFINES))
+
