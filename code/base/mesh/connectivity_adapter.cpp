@@ -41,11 +41,13 @@ bool mesh::connectivity_adapter::is_new_message(const mesh::message &msg)  {
 
 bool mesh::connectivity_adapter::send(mesh::message &message, mesh::node_id next_hop)  {
     if (next_hop == 0) next_hop = message.receiver;
-    LOG("SENDING", message);
 
 
     mesh_connection_state state = connection_state(next_hop);
     if (state == DISCONNECTED) {
+        LOG("Node disconnected", "");
+        status();
+        return false;
     } else if (message.receiver != 0 &&
                state != mesh::ACCEPTED
                && message.type != DISCOVERY::RESPOND

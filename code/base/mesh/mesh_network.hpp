@@ -19,7 +19,7 @@ namespace mesh {
         size_t blacklist_size = 0;
 
         uint32_t update_count = 0;
-        uint32_t keepalive_interval = 10;
+        uint32_t keepalive_interval = 1000;
 
 
         bool is_blacklisted(const node_id &id) {
@@ -61,7 +61,6 @@ namespace mesh {
                 if (!connection.is_new_message(msg)) { //message already handled
                     continue;
                 }
-                LOG("Received ", msg);
                 if (msg.receiver == connection.address ||
                     msg.receiver == 0) { //Message is for us, or broadcast, take it
                     if (!handleMessage(msg)) {
@@ -70,10 +69,8 @@ namespace mesh {
                 } else { //Not for us, todo relay message (through routing)
                     uint8_t next_hop = 0;
                     if (connection.connection_state(msg.receiver) != ACCEPTED) {
-                        LOG("NOT DIRECT, GETTING NEXT HOP", "");
                         next_hop = network_router.get_next_hop(msg.receiver);
                     } else {
-                        LOG("DIRECT AF, GETTING NEXT HOP", "");
                     }
                     if (!connection.send(msg, next_hop)) {
                         network_router.update_neighbours();
@@ -102,20 +99,25 @@ namespace mesh {
 
         void unicast_close_if_fail(message &msg, const node_id &next_hop = 0) {
             if (!connection.send(msg, next_hop)) {
+                LOG("UNICAST FAILED", "");
                 connection.remove_direct_connection(next_hop != 0 ? next_hop : msg.receiver);
                 network_router.send_update();
             }
         }
 
         void unicast_all_close_if_fail(message &msg) {
-            node_id failed[connection.get_neighbour_count()];
+            size_t count = connection.get_neighbour_count();
+            node_id failed[count];
+
+            for(size_t i = 0; i < count; i++) {
+                failed[i] = 0;
+            }
 
             if (!connection.send_all(msg, failed)) {
                 for (size_t i = 0; i < connection.get_neighbour_count(); i++) {
                     if (failed[i] == 0) {
                         continue;
                     }
-                    LOG("FAILED", failed[i]);
                     connection.remove_direct_connection(failed[i]);
                 }
                 network_router.send_update();
@@ -124,10 +126,14 @@ namespace mesh {
 
         void sendMessage(message &msg) {
             uint8_t nextAddress = network_router.get_next_hop(msg.receiver);
+            if(nextAddress == 0) {
+                return;
+            }
             msg.sender = connection.address;
             if (!connection.send(msg, nextAddress)) {
                 // Todo actual error handling
 //                router.update_neighbours();
+                LOG("failed", msg << " - " << nextAddress);
             }
         }
 
@@ -178,6 +184,7 @@ namespace mesh {
                     break;
                 case DISCOVERY::DENY:
                     if (msg.receiver == connection.address) {
+                        LOG("DENYING", "");
                         connection.remove_direct_connection(msg.sender);
                     }
                     break;

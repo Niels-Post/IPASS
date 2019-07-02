@@ -67,6 +67,10 @@ namespace mesh {
 
         bool nrf::send_implementation(node_id &id, uint8_t *data, size_t size) {
             size_t listen_pipe = getPipeByNodeId(id);
+            if(listen_pipe == 6) {
+                LOG("No Pipe", "");
+                return false;
+            }
             return connections[listen_pipe].send_message(connections, nrf24, size, data);
         }
 
@@ -131,6 +135,7 @@ namespace mesh {
             }
 
             nrf_pipe &conn = connections[pipe];
+            LOG("REMOVING", pipe << " - " << address);
             conn.setConnectionState(mesh::DISCONNECTED);
             forget_message_history_for(address);
 

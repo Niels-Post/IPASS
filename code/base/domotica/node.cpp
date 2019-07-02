@@ -14,16 +14,12 @@ namespace mesh_domotics {
             network.update();
             uint8_t newMsg = network.check_new_messages(uncaughtMessages);
             for (uint8_t i = 0; i < newMsg; i++) {
-                LOG("SOMETHING UNCAUGHT", "");
                 mesh::message &msg = uncaughtMessages[i];
                 update_input_module(msg);
             }
 
-            hwlib::wait_ms(10);
-            for (uint8_t x = 0; x < 15; x++) {
+            hwlib::wait_ms(5);
                 update_output_module();
-                hwlib::wait_us(1);
-            }
         }
 
     }
@@ -32,7 +28,6 @@ namespace mesh_domotics {
     void node::update_output_module() {
         uint8_t data[4];
         if (outputmodule.get_output(data, ++output_update_count > 50)) {
-            LOG("FORCED", "");
             mesh::message msg(
                     mesh::DOMOTICA::DATA,
                     0,
@@ -67,7 +62,6 @@ namespace mesh_domotics {
             }
         }
         if (!filter_ok) {
-            LOG("FILTER NOT OK", "" );
             return;
         }
 

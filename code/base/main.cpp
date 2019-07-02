@@ -27,7 +27,7 @@ int main() {
     nrf.power(true);
     LOG("NRF_POWER_ON", "");
 
-    mesh::node_id ID = 0x10;
+    mesh::node_id ID = 0x20;
     LOG("MY_ID", ID);
 
 

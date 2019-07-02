@@ -34,7 +34,7 @@ namespace mesh {
         }
 
         void link_state::update_neighbours() {
-            connectivity.status();
+//            connectivity.status();
             size_t count = connectivity.get_neighbour_count();
             uint8_t neighbours[count];
             connectivity.get_neighbours(neighbours);
