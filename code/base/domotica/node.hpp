@@ -37,9 +37,9 @@ namespace mesh_domotics {
     private:
         mesh::mesh_network &network;
 
-        module dummy;
         input_module &inputmodule;
         output_module &outputmodule;
+        uint8_t output_update_count = 0;
     public:
 
 
@@ -59,14 +59,14 @@ namespace mesh_domotics {
          * Update a module (if it is an input). Feeds received data into the input module, if it's filter matches the sender of the data
          * @param m Module to update
          */
-        void update_input_module(module &m, mesh::message &msg);
+        void update_input_module(mesh::message &msg);
 
 
         /**
          * Update a module (if it is an output). Checks for any changed data, and sends it to all nodes in filter
          * @param m Module to update
          */
-        void update_output_module(output_module &m);
+        void update_output_module();
 
         /**
          * Main loop for a domotica node (DOESN't RETURN)
@@ -76,15 +76,15 @@ namespace mesh_domotics {
 
         /**
          * Change this node's primary module
-         * @param primary_module New primary module
+         * @param input New primary module
          */
-        void set_input_module(input_module &primary_module);
+        void set_input_module(input_module &input);
 
         /**
          * Change this node's secondary module
-         * @param secondary_module New secondary module
+         * @param output New secondary module
          */
-        void set_output_module(output_module &secondary_module);
+        void set_output_module(output_module &output);
     };
 
     /**

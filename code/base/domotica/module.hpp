@@ -7,6 +7,7 @@
 
 
 #include "../mesh/message.hpp"
+#include "../util/cout_debug.hpp"
 
 /**
  * \defgroup \title modules
@@ -34,7 +35,8 @@ namespace mesh_domotics {
  */
     union domotica_value {
         int32_t numeric = 0;
-        char data[4];
+        char characters[4];
+        uint8_t data[4];
     };
 
 /**
@@ -108,7 +110,8 @@ namespace mesh_domotics {
          * @param force Force the module to give data, even if it hasn't changed
          * @return True if the data had changed (or if it was forced)
          */
-        virtual bool get_output(uint8_t data[4], bool force) { return false; };
+        virtual bool get_output(uint8_t data[4], bool force) {
+            return false; };
 
     };
 

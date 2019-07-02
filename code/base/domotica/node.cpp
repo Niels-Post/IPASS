@@ -12,15 +12,16 @@ namespace mesh_domotics {
         std::array<mesh::message, 10> uncaughtMessages = {};
         for (;;) {
             network.update();
-            for (uint8_t i = 0; i < network.check_new_messages(uncaughtMessages); i++) {
+            uint8_t newMsg = network.check_new_messages(uncaughtMessages);
+            for (uint8_t i = 0; i < newMsg; i++) {
                 LOG("SOMETHING UNCAUGHT", "");
                 mesh::message &msg = uncaughtMessages[i];
-                update_input_module(inputmodule, msg);
+                update_input_module(msg);
             }
 
-            hwlib::wait_ms(1);
-            for (uint8_t x = 0; x < 50; x++) {
-                update_output_module(outputmodule);
+            hwlib::wait_ms(10);
+            for (uint8_t x = 0; x < 15; x++) {
+                update_output_module();
                 hwlib::wait_us(1);
             }
         }
@@ -28,13 +29,10 @@ namespace mesh_domotics {
     }
 
 
-    void node::update_output_module(output_module &m) {
-        if (m.getType() != OUTPUT) {
-            return;
-        }
+    void node::update_output_module() {
         uint8_t data[4];
-        auto &out = m;
-        if (out.get_output(data, true)) {
+        if (outputmodule.get_output(data, ++output_update_count > 50)) {
+            LOG("FORCED", "");
             mesh::message msg(
                     mesh::DOMOTICA::DATA,
                     0,
@@ -47,39 +45,40 @@ namespace mesh_domotics {
             msg.data[2] = data[2];
             msg.data[3] = data[3];
             for (uint8_t i = 0; i < 10; i++) {
-                if (out.filter[i] == 0) {
+                if (outputmodule.filter[i] == 0) {
                     break;
                 }
-                msg.receiver = out.filter[i];
+                msg.receiver = outputmodule.filter[i];
                 network.sendMessage(msg);
             }
         }
+
+        if(output_update_count > 50) {
+            output_update_count = 0;
+        }
     }
 
-    void node::update_input_module(module &m, mesh::message &msg) {
-        if (m.getType() != INPUT) {
-            return;
-        }
+    void node::update_input_module(mesh::message &msg) {
         bool filter_ok = false;
         for (uint8_t i = 0; i < 10; i++) {
-            if (msg.sender == m.filter[i]) {
+            if (msg.sender == inputmodule.filter[i]) {
                 filter_ok = true;
                 break;
             }
         }
         if (!filter_ok) {
+            LOG("FILTER NOT OK", "" );
             return;
         }
 
         uint8_t data[4];
-        auto &inp = static_cast<input_module &>(m);
 
         if (msg.type == mesh::DOMOTICA::DATA) {
             data[0] = msg.data[0];
             data[1] = msg.data[1];
             data[2] = msg.data[2];
             data[3] = msg.data[3];
-            inp.set_input(data);
+            inputmodule.set_input(data);
         }
     }
 
@@ -88,12 +87,12 @@ namespace mesh_domotics {
 
     }
 
-    void node::set_input_module(input_module &primary_module) {
-        node::inputmodule = primary_module;
+    void node::set_input_module(input_module &input) {
+        inputmodule = input;
     }
 
-    void node::set_output_module(output_module &secondary_module) {
-        node::outputmodule = secondary_module;
+    void node::set_output_module(output_module &output) {
+        outputmodule = output;
     }
 
 

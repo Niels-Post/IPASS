@@ -36,6 +36,7 @@ namespace mesh_domotics {
 
 
         class rotary_encoder : public output_module {
+            domotica_value last_value;
         public:
             /**
              * Creates a Rotary encoder input module

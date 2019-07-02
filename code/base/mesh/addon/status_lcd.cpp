@@ -8,7 +8,7 @@
 mesh::status_lcd::status_lcd(mesh::mesh_network &network, lcd::i2c_backpack &lcd) : network(network), lcd(lcd), current_mode(GENERAL) {}
 
 void mesh::status_lcd::update() {
-    network.get_connection().status();
+//    network.get_connection().status();
     lcd.set_row(0);
     lcd <<  "ID: " << hwlib::hex << network.get_connection().address ;
     switch(current_mode) {
@@ -19,7 +19,7 @@ void mesh::status_lcd::update() {
             lcd << "  distances";
             lcd.set_row(1);
             auto &router = static_cast<mesh::routers::link_state &>(network.get_router());
-            for (uint8_t i = 0; i < router.get_calculator().get_node_count(); i++) {
+            for (uint8_t i = 1; i < router.get_calculator().get_node_count(); i++) {
                 auto node = router.get_calculator().get_node(i);
                 lcd << hwlib::hex << node.id << "(" << node.distance << ")";
             }

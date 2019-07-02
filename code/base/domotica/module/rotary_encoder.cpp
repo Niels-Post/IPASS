@@ -3,11 +3,12 @@
 //
 
 #include "rotary_encoder.hpp"
+#include "../../util/cout_debug.hpp"
 
 volatile int val = 0;
 volatile bool debounce = false;
 
-void __attribute__((interrupt("IRQ"))) TIM2_IRQHandler() {
+void __attribute__((interrupt("IRQ"))) TIM2_IRQHandler(void) {
     debounce = false;
     if (TIM2->SR & TIM_SR_UIF) {
         TIM2->SR &= ~(TIM_SR_UIF);
@@ -33,13 +34,8 @@ void __attribute__((interrupt("IRQ"))) EXTI9_5_IRQHandler(void) {
 namespace mesh_domotics {
     namespace modules {
 
-        domotica_value lastVal;
-
-
-
-
         rotary_encoder::rotary_encoder(uint8_t id) : output_module(id) {
-
+//            auto p = hwlib::target::pin_in(hwlib::target::pins::a9);
 
             // Enable peripheral ports
             RCC->APB2ENR |=
@@ -50,7 +46,7 @@ namespace mesh_domotics {
             // Enable TIM2
             RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
             // Set prescaler for TIM2, (TIM2 should now tick a little less than once every ms, since we can't go any higher than that)
-            TIM2->PSC = 0xFFFF;
+            TIM2->PSC = 65000;
             // Autoreload every 10 timer "ticks", (so a little less than every 10 ms)
             TIM2->ARR = 10;
             // Enable Timer Interrupt (this wil call TIM2_IRQHandler)
@@ -59,12 +55,18 @@ namespace mesh_domotics {
             TIM2->CR1 |= TIM_CR1_CEN;
 
             // Clear mode for Pin 9 and 10
-            GPIOA->CRL &= ~(0xF << 9);
-            GPIOA->CRL &= ~(0xF << 10);
+            GPIOA->CRH &= ~(0xF << 1);
+            GPIOA->CRH &= ~(0xF << 2);
 
             // Set mode to input floating for pin 9 and 10
-            GPIOA->CRL |= (0x3 << 9);
-            GPIOA->CRL |= (0x3 << 10);
+            GPIOA->CRH |= (0x8 << 1);
+            GPIOA->CRH |= (0x8 << 2);
+
+//            GPIOA->ODR |= (1 << 9) | (1 << 10);
+
+//            auto q = hwlib::target::pin_in(hwlib::target::pins::a10);
+//            p.read();
+//            q.read();
 
             // Clear EXTI interrupt line selection, then set it to port A
             AFIO->EXTICR[3] &= ~(AFIO_EXTICR3_EXTI9);
@@ -87,12 +89,12 @@ namespace mesh_domotics {
         }
 
         bool rotary_encoder::get_output(uint8_t data[4], bool force) {
-            if (val != lastVal.numeric || force) {
-                data[0] = lastVal.data[0];
-                data[1] = lastVal.data[1];
-                data[2] = lastVal.data[2];
-                data[3] = lastVal.data[3];
-                lastVal.numeric = val;
+            if (val != last_value.numeric || force) {
+                data[0] = last_value.data[0];
+                data[1] = last_value.data[1];
+                data[2] = last_value.data[2];
+                data[3] = last_value.data[3];
+                last_value.numeric = val;
                 return true;
             }
             return false;
