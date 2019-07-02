@@ -86,7 +86,7 @@ public:
 
 
 
-//#define DEBUG_BUILD
+#define DEBUG_BUILD
 
 #ifdef DEBUG_BUILD
 #define LOG(title, message) do { auto c = cout_debug(); c << hwlib::left << hwlib::setw(20) << title<< message << hwlib::endl; } while (0)

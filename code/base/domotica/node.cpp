@@ -15,28 +15,25 @@ namespace mesh_domotics {
             for (uint8_t i = 0; i < network.check_new_messages(uncaughtMessages); i++) {
                 LOG("SOMETHING UNCAUGHT", "");
                 mesh::message &msg = uncaughtMessages[i];
-                update_input_module(primary_module, msg);
-                update_input_module(secondary_module, msg);
+                update_input_module(inputmodule, msg);
             }
 
-
+            hwlib::wait_ms(1);
             for (uint8_t x = 0; x < 50; x++) {
-                update_output_module(primary_module);
-                if(x % 4 == 0) {
-                    update_output_module(secondary_module);
-                }
+                update_output_module(outputmodule);
                 hwlib::wait_us(1);
             }
         }
+
     }
 
 
-    void node::update_output_module(module &m) {
+    void node::update_output_module(output_module &m) {
         if (m.getType() != OUTPUT) {
             return;
         }
         uint8_t data[4];
-        auto &out = static_cast<output_module &>(m);
+        auto &out = m;
         if (out.get_output(data, true)) {
             mesh::message msg(
                     mesh::DOMOTICA::DATA,
@@ -86,18 +83,19 @@ namespace mesh_domotics {
         }
     }
 
-    node::node(mesh::mesh_network &network, module primaryModule, module secondaryModule) : network(
-            network), primary_module(primaryModule), secondary_module(secondaryModule) {
+    node::node(mesh::mesh_network &network, input_module &inputModule, output_module &outputModule) : network(
+            network), inputmodule(inputModule), outputmodule(outputModule) {
 
     }
 
-    void node::set_primary_module(module primary_module) {
-        node::primary_module = primary_module;
+    void node::set_input_module(input_module &primary_module) {
+        node::inputmodule = primary_module;
     }
 
-    void node::set_secondary_module(module secondary_module) {
-        node::secondary_module = secondary_module;
+    void node::set_output_module(output_module &secondary_module) {
+        node::outputmodule = secondary_module;
     }
+
 
 
 }

@@ -37,22 +37,22 @@ namespace mesh_domotics {
     private:
         mesh::mesh_network &network;
 
-
-        module primary_module;
-        module secondary_module;
-
-
+        module dummy;
+        input_module &inputmodule;
+        output_module &outputmodule;
     public:
+
+
         /**
          * Create a domotica node
          * If this node is either receive only, or send only, the empty constructor for the corresponding module can be used
          * Depending on the module types, node will either feed data from the network into the module, or feed data from the module into the network
          * @param network Network to connect to and interact with
-         * @param primaryModule Primary module to use for this node
-         * @param secondaryModule  Secondary module to use
+         * @param inputModule Primary module to use for this node
+         * @param outputModule  Secondary module to use
          */
-        node(mesh::mesh_network &network, module primaryModule = {},
-                      module secondaryModule = {});
+        node(mesh::mesh_network &network, input_module &inputModule,
+                      output_module &outputModule);
 
 
         /**
@@ -66,7 +66,7 @@ namespace mesh_domotics {
          * Update a module (if it is an output). Checks for any changed data, and sends it to all nodes in filter
          * @param m Module to update
          */
-        void update_output_module(module &m);
+        void update_output_module(output_module &m);
 
         /**
          * Main loop for a domotica node (DOESN't RETURN)
@@ -78,13 +78,13 @@ namespace mesh_domotics {
          * Change this node's primary module
          * @param primary_module New primary module
          */
-        void set_primary_module(module primary_module);
+        void set_input_module(input_module &primary_module);
 
         /**
          * Change this node's secondary module
          * @param secondary_module New secondary module
          */
-        void set_secondary_module(module secondary_module);
+        void set_output_module(output_module &secondary_module);
     };
 
     /**

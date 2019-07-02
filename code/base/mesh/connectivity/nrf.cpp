@@ -5,6 +5,7 @@
 
 
 #include "nrf.hpp"
+#include "../../util/cout_debug.hpp"
 
 using nrf24l01::NRF_REGISTER;
 using nrf24l01::NRF_FEATURE;
@@ -253,10 +254,23 @@ namespace mesh {
         }
 
         void nrf::status() {
-            nrf_address test = nrf24.rx_get_address(0);
-            test = nrf24.tx_get_address();
-            uint8_t dat;
-            nrf24.read_register(NRF_REGISTER::EN_RXADDR, &dat);
+                LOG("Connection status:", "");
+                for(size_t i = 0; i < 6; i++) {
+                    LOG(i, connections[i] );
+                }
+
+                nrf_address test = nrf24.rx_get_address(0);
+                LOG("RX0", test);
+                test = nrf24.tx_get_address();
+                LOG("TX", test);
+                LOG("status", hwlib::bin << nrf24.last_status);
+                LOG("fifo", hwlib::bin << nrf24.fifo_status());
+                uint8_t dat;
+                nrf24.read_register(NRF_REGISTER::EN_RXADDR, &dat);
+                LOG("EN_RX", hwlib::bin << dat);
+
+
+
         }
     }
 }

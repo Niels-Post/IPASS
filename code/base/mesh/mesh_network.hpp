@@ -19,7 +19,7 @@ namespace mesh {
         size_t blacklist_size = 0;
 
         uint32_t update_count = 0;
-        uint32_t keepalive_interval = 5000;
+        uint32_t keepalive_interval = 10;
 
 
         bool is_blacklisted(const node_id &id) {
@@ -85,11 +85,6 @@ namespace mesh {
         }
 
         void update() {
-//            if(update_count%100 == 0) {
-//                cout_debug c;
-//                c << "." << hwlib::endl;
-//            }
-
             if (update_count++ > keepalive_interval) {
                 update_count = 0;
                 message keepalive = {
@@ -130,7 +125,6 @@ namespace mesh {
         void sendMessage(message &msg) {
             uint8_t nextAddress = network_router.get_next_hop(msg.receiver);
             msg.sender = connection.address;
-            LOG("SENDING", msg);
             if (!connection.send(msg, nextAddress)) {
                 // Todo actual error handling
 //                router.update_neighbours();
@@ -194,6 +188,14 @@ namespace mesh {
                     break;
             }
             return true;
+        }
+
+        connectivity_adapter &get_connection() const {
+            return connection;
+        }
+
+        router &get_router() const {
+            return network_router;
         }
     };
 }

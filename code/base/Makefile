@@ -9,7 +9,7 @@
 #############################################################################
 
 # source files in this project (main.cpp is automatically assumed)
-SOURCES := domotica/module.cpp domotica/module/led_port.cpp domotica/module/rotary_encoder.cpp domotica/module/seven_segment.cpp domotica/node.cpp mesh/connectivity/nrf.cpp mesh/connectivity/nrf_pipe.cpp mesh/connectivity_adapter.cpp mesh/router/link_state_router.cpp spi/spi_base.cpp spi/spi_bitbang.cpp spi/spi_blue_pill.cpp vtable.asm
+SOURCES := lcd/i2c_backpack.cpp mesh/addon/status_lcd.cpp domotica/module.cpp domotica/module/led_port.cpp domotica/module/rotary_encoder.cpp domotica/module/seven_segment.cpp domotica/node.cpp mesh/connectivity/nrf.cpp mesh/connectivity/nrf_pipe.cpp mesh/connectivity_adapter.cpp mesh/router/link_state_router.cpp spi/spi_base.cpp spi/spi_bitbang.cpp spi/spi_blue_pill.cpp vtable.asm
 
 # header files in this project
 HEADERS :=

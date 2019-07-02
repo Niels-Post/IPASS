@@ -99,6 +99,10 @@ namespace mesh {
             return ls_calc.get_next_hop(receiver);
         }
 
+        calculator<node_id, uint8_t, 5, 10> &link_state::get_calculator() {
+            return ls_calc;
+        }
+
 
     }
 }

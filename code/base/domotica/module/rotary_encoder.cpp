@@ -4,34 +4,38 @@
 
 #include "rotary_encoder.hpp"
 
+volatile int val = 0;
+volatile bool debounce = false;
+
+void __attribute__((interrupt("IRQ"))) TIM2_IRQHandler() {
+    debounce = false;
+    if (TIM2->SR & TIM_SR_UIF) {
+        TIM2->SR &= ~(TIM_SR_UIF);
+        debounce = false;
+    }
+}
+
+void __attribute__((interrupt("IRQ"))) EXTI9_5_IRQHandler(void) {
+    uint32_t idr = GPIOA->IDR & ((0x1u << 9u) | (0x1u << 10u));
+    if (!debounce) {
+        if (idr == (3u << 9u)) {
+            val++;
+        } else if (idr == (1u << 9u)) {
+            val--;
+        }
+    }
+    debounce = true;
+
+    EXTI->PR |= (1 << 9);
+}
+
+
 namespace mesh_domotics {
     namespace modules {
 
-        volatile int val = 0;
         domotica_value lastVal;
-        volatile bool debounce = false;
 
-        void __attribute__((interrupt("IRQ"))) TIM2_IRQHandler() {
-            debounce = false;
-            if (TIM2->SR & TIM_SR_UIF) {
-                TIM2->SR &= ~(TIM_SR_UIF);
-                debounce = false;
-            }
-        }
 
-        void __attribute__((interrupt("IRQ"))) EXTI9_5_IRQHandler(void) {
-            uint32_t idr = GPIOA->IDR & ((0x1u << 9u) | (0x1u << 10u));
-            if (!debounce) {
-                if (idr == (3u << 9u)) {
-                    val++;
-                } else if (idr == (1u << 9u)) {
-                    val--;
-                }
-            }
-            debounce = true;
-
-            EXTI->PR |= (1 << 9);
-        }
 
 
         rotary_encoder::rotary_encoder(uint8_t id) : output_module(id) {

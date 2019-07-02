@@ -1,5 +1,6 @@
 
 #include "connectivity_adapter.hpp"
+#include "../util/cout_debug.hpp"
 
 void mesh::connectivity_adapter::add_message_id(mesh::message &msg)  {
     if (msg.sender == address && msg.message_id == 0) {
@@ -40,6 +41,7 @@ bool mesh::connectivity_adapter::is_new_message(const mesh::message &msg)  {
 
 bool mesh::connectivity_adapter::send(mesh::message &message, mesh::node_id next_hop)  {
     if (next_hop == 0) next_hop = message.receiver;
+    LOG("SENDING", message);
 
 
     mesh_connection_state state = connection_state(next_hop);

@@ -35,6 +35,8 @@ namespace mesh { //Todo: Pagination for shitloads of nodes
 
             node_id get_next_hop(const node_id &receiver) override;
 
+            calculator<node_id, uint8_t, 5, 10> &get_calculator();
+
         };
     }
 }
