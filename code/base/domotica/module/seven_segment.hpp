@@ -8,13 +8,14 @@
 namespace mesh_domotics {
     namespace modules {
         /**
-         * \addtogroup modules
+         * \addtogroup example_modules
          * \ingroup mesh_domotics
          * @{
          */
 
         /**
-         * Domotica input module for a seven segment 1 digit display
+         * \brief Domotica input module for a seven segment 1 digit display
+         *
          * Uses a port as output
          * TODO: allow more digits
          */
@@ -25,14 +26,17 @@ namespace mesh_domotics {
 
         public:
             /**
-             * Create a seven segment display module
+             * \brief Create a seven segment display module
+             *
              * @param id Module ID, make sure this is unique within a network
              * @param port Port to use for the pin_outs, which should be filled with pin_outs in order from pin A to G
              */
             seven_segment(uint8_t id, hwlib::port_out &port);
 
             /**
-             * Set the state of the seven segment display (uses the first byte of data as an uint8, since we can only have 10 values anyway)
+             * \brief Set the state of the seven segment display
+             *
+             * Uses the first byte of data as an uint8, since we can only have 10 values anyway.
              * @param data Pointer to the value to use
              */
             void set_input(uint8_t *data) override;

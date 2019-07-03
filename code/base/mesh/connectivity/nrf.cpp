@@ -58,7 +58,7 @@ namespace mesh {
                     message.connectionData[0] = connections[getPipeByNodeId(next_hop)].getNrfAddress().address_bytes[4];
                     break;
                 case DISCOVERY::PRESENT:
-                    message.connectionData[0] = connections[getPipeByNodeId(address)].getNrfAddress().address_bytes[4];
+                    message.connectionData[0] = connections[getPipeByNodeId(id)].getNrfAddress().address_bytes[4];
                     break;
                 default:
                     break;
@@ -67,7 +67,7 @@ namespace mesh {
 
         bool nrf::send_implementation(node_id &id, uint8_t *data, size_t size) {
             size_t listen_pipe = getPipeByNodeId(id);
-            if(listen_pipe == 6) {
+            if (listen_pipe == 6) {
                 LOG("No Pipe", "");
                 return false;
             }
@@ -128,16 +128,17 @@ namespace mesh {
             return true;
         }
 
-        void nrf::remove_direct_connection(const uint8_t &address) {
-            uint8_t pipe = getPipeByNodeId(address);
+        void nrf::remove_direct_connection(const uint8_t &id) {
+            uint8_t pipe = getPipeByNodeId(id);
             if (pipe == 6 || pipe == 0) {
                 return;
             }
 
             nrf_pipe &conn = connections[pipe];
-            LOG("REMOVING", pipe << " - " << address);
+            LOG("REMOVING", pipe << " - " << id);
             conn.setConnectionState(mesh::DISCONNECTED);
-            forget_message_history_for(address);
+            conn.setNodeId(0);
+            forget_message_history_for(id);
 
             conn.flush(nrf24);
 
@@ -155,7 +156,7 @@ namespace mesh {
 
             for (nrf_pipe &empty_connection : connections) {
                 if (empty_connection.getConnectionState() == mesh::DISCONNECTED) {
-                    nrf_address listenaddress = {base_address, address};
+                    nrf_address listenaddress = {base_address, id};
                     bool found = true;
                     while (found) {
                         listenaddress.address_bytes[4] += 2;
@@ -169,7 +170,7 @@ namespace mesh {
                     }
 
                     empty_connection.setNrfAddress(listenaddress);
-                    empty_connection.setNodeId(address);
+                    empty_connection.setNodeId(id);
                     empty_connection.setConnectionState(mesh::WAITING);
                     empty_connection.flush(nrf24);
                     return;
@@ -204,7 +205,7 @@ namespace mesh {
 
         bool nrf::discovery_respond_received(mesh::message &origin) {
             uint8_t pipe_nr = getPipeByNRFAddress(origin.connectionData[0]);
-            if (pipe_nr == 6 || connections[pipe_nr].getNodeId() != address) {
+            if (pipe_nr == 6 || connections[pipe_nr].getNodeId() != id) {
                 return false;
             }
 
@@ -259,21 +260,20 @@ namespace mesh {
         }
 
         void nrf::status() {
-                LOG("Connection status:", "");
-                for(size_t i = 0; i < 6; i++) {
-                    LOG(i, connections[i] );
-                }
+            LOG("Connection status:", "");
+            for (size_t i = 0; i < 6; i++) {
+                LOG(i, connections[i]);
+            }
 
-                nrf_address test = nrf24.rx_get_address(0);
-                LOG("RX0", test);
-                test = nrf24.tx_get_address();
-                LOG("TX", test);
-                LOG("status", hwlib::bin << nrf24.last_status);
-                LOG("fifo", hwlib::bin << nrf24.fifo_status());
-                uint8_t dat;
-                nrf24.read_register(NRF_REGISTER::EN_RXADDR, &dat);
-                LOG("EN_RX", hwlib::bin << dat);
-
+            nrf_address test = nrf24.rx_get_address(0);
+            LOG("RX0", test);
+            test = nrf24.tx_get_address();
+            LOG("TX", test);
+            LOG("status", hwlib::bin << nrf24.last_status);
+            LOG("fifo", hwlib::bin << nrf24.fifo_status());
+            uint8_t dat;
+            nrf24.read_register(NRF_REGISTER::EN_RXADDR, &dat);
+            LOG("EN_RX", hwlib::bin << dat);
 
 
         }

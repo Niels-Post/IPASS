@@ -10,9 +10,9 @@
 #include "../util/cout_debug.hpp"
 
 /**
- * \defgroup \title modules
+ * \defgroup example_modules Example Domotics Modules
  * \ingroup mesh_domotics
- * \brief Collection of mesh_domotics modules
+ * \brief Collection of example mesh_domotics modules
  */
 
 namespace mesh_domotics {
@@ -22,7 +22,7 @@ namespace mesh_domotics {
      */
 
 /**
- * Indicates if a module is input or output, NONE can be used for "default" initializers
+ * \brief Indicates if a module is input or output, NONE can be used for "default" initializers
  */
     enum module_type {
         NONE,
@@ -30,17 +30,21 @@ namespace mesh_domotics {
         OUTPUT
     };
 
-/**
- * Used to easily "convert" data into bytes for transfer
- */
+    /**
+     * \brief Used to easily "convert" data into bytes for transfer
+     */
     union domotica_value {
+        /// Numeric Value
         int32_t numeric = 0;
+        /// Value of Characters
         char characters[4];
+        /// Value of bytes
         uint8_t data[4];
     };
 
 /**
- *  Base ADT for domotica network modules.
+ *  \brief Base ADT for domotica network modules.
+ *
  *  Domotica modules either provide data for something in the network to handle, or handle the data themselves
  */
     class module {
@@ -50,26 +54,29 @@ namespace mesh_domotics {
     protected:
     public:
         /**
-         * List of node_id's for the module to interact with
+         * \brief List of node_id's for the module to interact with.
+         *
          * For an output module, these are the nodes it sends it's data to
          * For an input module, it is the nodes it should act on
          */
         std::array<mesh::node_id, 10> filter = {0};
 
         /**
-         * Create a default module, mainly used to fill references that are not used
+         * \brief Create a default module, mainly used to fill references that are not used
          */
         module();
 
         /**
-         * Create a domotica module with type
+         * \brief Create a domotica module with type
+         *
          * @param type Type of the module
          * @param id Id of the module, note that this should be unique within a network
          */
         module(module_type type, uint8_t id);
 
         /**
-         * Retrieve the type of this module
+         * \brief Retrieve the type of this module
+         *
          * @return Type enum
          */
         module_type getType() const;
@@ -78,16 +85,21 @@ namespace mesh_domotics {
     };
 
 
+    /**
+     * \brief Domotica input module, should respond to input from the network
+     */
     class input_module : public module {
     public:
         /**
-         * Create an input module
+         * \brief Create an input module
+         *
          * @param id Id of the module, note that this should be unique within a network
          */
         input_module(uint8_t id);
 
         /**
-         * Feed an input into this module
+         * \brief Feed an input into this module
+         *
          * Note that filter checking needs to be done before this method is called
          * Input modules should document how they interpret 4 byte data
          * @param data Data to set
@@ -96,6 +108,9 @@ namespace mesh_domotics {
     };
 
 
+    /**
+     * \brief Domotica output module, should provide output for the network
+     */
     class output_module : public module {
     public:
         /**
@@ -111,7 +126,8 @@ namespace mesh_domotics {
          * @return True if the data had changed (or if it was forced)
          */
         virtual bool get_output(uint8_t data[4], bool force) {
-            return false; };
+            return false;
+        };
 
     };
 

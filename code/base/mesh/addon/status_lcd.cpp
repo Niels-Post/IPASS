@@ -5,13 +5,14 @@
 #include "status_lcd.hpp"
 #include "../router/link_state_router.hpp"
 
-mesh::status_lcd::status_lcd(mesh::mesh_network &network, lcd::i2c_backpack &lcd) : network(network), lcd(lcd), current_mode(GENERAL) {}
+mesh::addons::status_lcd::status_lcd(mesh::mesh_network &network, lcd::i2c_backpack &lcd) : network(network), lcd(lcd),
+                                                                                    current_mode(GENERAL) {}
 
-void mesh::status_lcd::update() {
+void mesh::addons::status_lcd::update() {
 //    network.get_connection().status();
     lcd.set_row(0);
-    lcd <<  "ID: " << hwlib::hex << network.get_connection().address ;
-    switch(current_mode) {
+    lcd << "ID: " << hwlib::hex << network.get_connection().id;
+    switch (current_mode) {
         case GENERAL:
 
             break;
@@ -25,13 +26,16 @@ void mesh::status_lcd::update() {
             }
             break;
         }
-        case LINK_STATE_NEIGHBOURS:break;
-        case NETWORK_BUFFERSIZE:break;
-        case BLACKLIST:break;
+        case LINK_STATE_NEIGHBOURS:
+            break;
+        case NETWORK_BUFFERSIZE:
+            break;
+        case BLACKLIST:
+            break;
     }
     lcd.flush();
 }
 
-void mesh::status_lcd::setCurrentMode(mesh::display_mode currentMode) {
+void mesh::addons::status_lcd::setCurrentMode(mesh::addons::display_mode currentMode) {
     current_mode = currentMode;
 }

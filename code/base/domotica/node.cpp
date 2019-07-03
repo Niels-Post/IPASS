@@ -7,7 +7,6 @@
 namespace mesh_domotics {
 
 
-
     void node::loop() {
         std::array<mesh::message, 10> uncaughtMessages = {};
         for (;;) {
@@ -19,7 +18,7 @@ namespace mesh_domotics {
             }
 
             hwlib::wait_ms(5);
-                update_output_module();
+            update_output_module();
         }
 
     }
@@ -48,7 +47,7 @@ namespace mesh_domotics {
             }
         }
 
-        if(output_update_count > 50) {
+        if (output_update_count > 50) {
             output_update_count = 0;
         }
     }
@@ -80,15 +79,6 @@ namespace mesh_domotics {
             network), inputmodule(inputModule), outputmodule(outputModule) {
 
     }
-
-    void node::set_input_module(input_module &input) {
-        inputmodule = input;
-    }
-
-    void node::set_output_module(output_module &output) {
-        outputmodule = output;
-    }
-
 
 
 }

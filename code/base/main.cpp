@@ -15,8 +15,6 @@
 int main() {
 
 
-
-
     auto ce = hwlib::target::pin_out(hwlib::target::pins::a3);
     auto bus = spi_blue_pill({false, false, 1});
     auto nrf = nrf24l01::nrf24l01plus(bus, hwlib::pin_out_dummy, ce);
@@ -40,10 +38,6 @@ int main() {
     mesh_domotics::output_module dummy_out = {0};
 
 
-
-
-
-
     switch (ID) {
         case 0x10: {
             mesh_domotics::modules::rotary_encoder r(1);
@@ -63,15 +57,15 @@ int main() {
             lcd << "WELKOM";
             lcd.flush();
 
-            mesh::status_lcd status(net, lcd);
-            status.setCurrentMode(mesh::LINK_STATE_DISTANCES);
+            mesh::addons::status_lcd status(net, lcd);
+            status.setCurrentMode(mesh::addons::LINK_STATE_DISTANCES);
             uint8_t i = 0;
             std::array<mesh::message, 10> arr = {};
-            for(;;) {
+            for (;;) {
 
                 net.update();
                 net.check_new_messages(arr);
-                if(i > 25) {
+                if (i > 25) {
                     i = 0;
                     status.update();
                 }
@@ -108,7 +102,6 @@ int main() {
             mesh_domotics::modules::led_port l(2, port);
 
             mesh_domotics::node node(net, l, dummy_out);
-            node.set_input_module(l);
             node.loop();
         }
 

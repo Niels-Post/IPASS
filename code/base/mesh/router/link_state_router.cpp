@@ -29,7 +29,7 @@ namespace mesh {
         }
 
         link_state::link_state(connectivity_adapter &connectivity) : router(connectivity),
-                                                                          ls_calc(connectivity.address) {
+                                                                     ls_calc(connectivity.id) {
             update_neighbours();
         }
 
@@ -51,7 +51,7 @@ namespace mesh {
             message update_message(
                     LINK_STATE_ROUTING::UPDATE,
                     0,
-                    connectivity.address,
+                    connectivity.id,
                     0
             );
             fill_update_message(update_message);
@@ -64,7 +64,7 @@ namespace mesh {
             message message = {
                     LINK_STATE_ROUTING::UPDATE_REQUEST,
                     0,
-                    connectivity.address,
+                    connectivity.id,
                     0
             };
             fill_update_message(message);
@@ -90,7 +90,7 @@ namespace mesh {
 
         }
 
-        node_id link_state::get_next_hop(const node_id &receiver)  {
+        node_id link_state::get_next_hop(const node_id &receiver) {
             if (!is_updated) {
                 is_updated = true;
                 ls_calc.setup();

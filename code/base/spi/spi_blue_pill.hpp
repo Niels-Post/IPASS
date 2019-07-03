@@ -8,23 +8,62 @@
 #include <hwlib.hpp>
 #include "spi_base.hpp"
 
-class spi_blue_pill : public hwlib_ex::spi_base_bus {
-    bool start;
-    uint8_t data_out_empty[32] = {0};
+namespace spi_ex {
+    /**
+     * \addtogroup spi_ex
+     * @{
+     */
 
-public:
-    spi_blue_pill(hwlib_ex::spi_mode mode);
+    /**
+     * \brief Hardware SPI implementation for the STM32 Bluepill
+     *
+     * Uses hardware SPI1, and DMA, for extra fast transfer.
+     * Unfortunately this bus doesn't support other modes than the default one.
+     * Uses the default SPI1 pins (A4-A7 (CSN,CLK,MISO,MOSI)
+     */
+    class spi_blue_pill : public spi_base_bus {
+        /// \brief 32 Free 0 bytes, for when only reading
+        uint8_t data_out_empty[32] = {0};
 
-private:
+    public:
+        /**
+         * \brief Create a Blue_pill spi bus
+         *
+         * Sets pins A4-A7 to their right mode for SPI transfer, prepares DMA1 channels 2 and 3 for SPI transfer.
+         * @param mode SPI Mode to use, as stated before, changing this has no effect now
+         */
+        spi_blue_pill(spi_mode mode);
 
-    void write_read(size_t n, const uint8_t *data_out, uint8_t *data_in) override;
+    private:
+        /**
+         * \brief Write_Read implementation
+         * @param n Amount of bytes to write
+         * @param data_out Pointer to data to write
+         * @param data_in  Pointer to memory location to read into
+         *
+         * This method waits until SPI and DMA both signal that they're done and then returns.
+         */
+        void write_read(size_t n, const uint8_t *data_out, uint8_t *data_in) override;
 
-protected:
-    void onStart(spi_transaction &transaction) override;
+    protected:
+        /**
+         * \brief Pulls CSN low, ignores the set CSN pin
+         * @param transaction The starting transaction
+         */
+        void onStart(spi_transaction &transaction) override;
 
-    void onEnd(spi_transaction &transaction) override;
+        /**
+         * \brief Pulls CSN high, ignores the set CSN pin
+         * @param transaction The ending transaction
+         */
+        void onEnd(spi_transaction &transaction) override;
 
-};
+    };
+
+    /**
+     * @}
+     */
+}
 
 
 #endif //IPASS_SPI_BLUE_PILL_HPP

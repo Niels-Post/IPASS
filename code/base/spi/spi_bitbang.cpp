@@ -4,13 +4,9 @@
 
 #include "spi_bitbang.hpp"
 
-namespace hwlib {
 
-
-}
-
-hwlib_ex::spi_bitbang::spi_bitbang(hwlib::pin_out &_sclk, hwlib::pin_out &_mosi, hwlib::pin_in &_miso,
-                                   const hwlib_ex::spi_mode &mode)
+spi_ex::spi_bitbang::spi_bitbang(hwlib::pin_out &_sclk, hwlib::pin_out &_mosi, hwlib::pin_in &_miso,
+                                   const spi_ex::spi_mode &mode)
         : spi_base_bus(mode), sclk(_sclk),
           mosi(_mosi), miso(_miso) {
     sclk.write(mode.clock_polarity);
@@ -18,7 +14,7 @@ hwlib_ex::spi_bitbang::spi_bitbang(hwlib::pin_out &_sclk, hwlib::pin_out &_mosi,
 }
 
 
-void hwlib_ex::spi_bitbang::write_read(size_t n, const uint8_t *data_out, uint8_t *data_in) {
+void spi_ex::spi_bitbang::write_read(size_t n, const uint8_t *data_out, uint8_t *data_in) {
     for (uint8_t i = 0; i < n; ++i) {
         uint8_t d =
                 (data_out == nullptr)
@@ -34,7 +30,7 @@ void hwlib_ex::spi_bitbang::write_read(size_t n, const uint8_t *data_out, uint8_
     wait_half_period();
 }
 
-void hwlib_ex::spi_bitbang::write_read_reverse(size_t n, const uint8_t *data_out, uint8_t *data_in) {
+void spi_ex::spi_bitbang::write_read_reverse(size_t n, const uint8_t *data_out, uint8_t *data_in) {
 
     if (data_in != nullptr) {
         data_in += n;
@@ -59,11 +55,11 @@ void hwlib_ex::spi_bitbang::write_read_reverse(size_t n, const uint8_t *data_out
 }
 
 
-void hwlib_ex::spi_bitbang::wait_half_period() {
+void spi_ex::spi_bitbang::wait_half_period() {
     hwlib::wait_ns(mode.half_time_ns);
 }
 
-void hwlib_ex::spi_bitbang::write_read_byte(uint8_t &d) {
+void spi_ex::spi_bitbang::write_read_byte(uint8_t &d) {
     if (mode.clock_phase) {
         for (uint_fast8_t j = 0; j < 8; ++j) {
             sclk.write(!mode.clock_polarity);

@@ -9,17 +9,17 @@
 #include "../module.hpp"
 
 /**
- * \fn EXTI9_5_IRQHandler
- * \ingroup modules
+ * \brief EXTI9_5 interrupt handler
+ *
  * External interrupt handler, used for detecting edges on pin A9, for reading the rotary encoder
  * TODO: Implement possibility for other pins
  */
 void __attribute__((interrupt("IRQ"))) EXTI9_5_IRQHandler(void) asm ("EXTI9_5_IRQHandler");
 
 /**
- * \fn TIM2_IRQHandler
- * \ingroup modules
- * Timer 2 Interrupt handler, used for debouncing rotary encoder input
+ * \brief Timer 2 Interrupt handler
+ *
+ * Used for debouncing rotary encoder input
  * TODO: implement timer choice
  */
 void __attribute__((interrupt("IRQ"))) TIM2_IRQHandler(void) asm ("TIM2_IRQHandler");
@@ -28,13 +28,16 @@ void __attribute__((interrupt("IRQ"))) TIM2_IRQHandler(void) asm ("TIM2_IRQHandl
 namespace mesh_domotics {
     namespace modules {
         /**
-         * \addtogroup modules
+         * \addtogroup example_modules
          * \ingroup mesh_domotics
          * @{
          */
 
 
 
+        /**
+         * \brief Output module for Rotary encoders, uses interrupts for accurate input
+         */
         class rotary_encoder : public output_module {
             domotica_value last_value;
         public:

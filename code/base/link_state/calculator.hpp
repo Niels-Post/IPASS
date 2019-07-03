@@ -10,7 +10,7 @@
 
 namespace link_state {
     /**
-     * \defgroup link_state
+     * \defgroup link_state Link State Algorithm Calculator
      * \brief Abstract implementation of the link_state algorithm
      *
      * Uses a template for adaptibility with various situations.
@@ -24,10 +24,11 @@ namespace link_state {
      */
 
     /**
-     * Link State Calculator. Calculates shortest path from a source node to any node in the network.
+     * \brief Link State Calculator. Calculates shortest path from a source node to any node in the network.
      *
      * Calculator assumes node index 0 to always be the source node. Make sure this is correctly set for any use of this module.
      * THe link state algorithm is used to find the shortest route for the current state of the given network graph.
+     * todo Auto cleanup unreachable nodes
      * @tparam id_type Datatype that is used for node identifiers
      * @tparam cost_type Datatype used for edge costs, calculator automatically calculates the max value for the given datatype based on it's size. Make sure this datatype is large enough to hold summed distances as well.
      * @tparam max_edges Maximum number of edges each node can hold. Keeping this at a minimum saves memory space.

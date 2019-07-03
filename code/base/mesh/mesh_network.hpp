@@ -10,7 +10,37 @@
 #include "connectivity_adapter.hpp"
 #include "router.hpp"
 
+
+/**
+ * \defgroup mesh_networking Mesh Networking Library
+ * \brief Implementation of a mesh network, using routing
+ *
+ * Connectivity_adapter and network_router can be set to different implementations, allowing for custom routing algorithms, or connection methods.
+ * When using the router base class, the network will just have direct connections.
+ */
+
+
+/**
+ * \defgroup addons Mesh Addons
+ * \ingroup mesh_networking
+ * \brief Mesh network addons
+ *
+ * Example addons for debugging purposes, or to provide extended functionality to a node.
+ */
+
 namespace mesh {
+
+    /**
+     * \addtogroup mesh_networking
+     * @{
+     */
+
+    /**
+     * \brief Main class of a mesh_network.
+     *
+     * handles discovery messages, keepalives and routing through the given router.
+     * Because of the abstraction of connectivity_adapter, this class can work with any connection method.
+     */
     class mesh_network {
         connectivity_adapter &connection;
         router &network_router;
@@ -22,6 +52,12 @@ namespace mesh {
         uint32_t keepalive_interval = 1000;
 
 
+        /**
+         * \brief Checks if a node is blacklisted from direct connections.
+         *
+         * @param id Node id of the node to check for
+         * @return True if the node is blacklisted
+         */
         bool is_blacklisted(const node_id &id) {
             for (const node_id &checkid : blacklist) {
                 if (id == checkid) {
@@ -36,11 +72,27 @@ namespace mesh {
 
 
     public:
+        /**
+         * \brief Construct a mesh_network
+         *
+         * Note that for a network to work properly, all nodes should implement the same router and connection method.
+         * @param connection Connectivity_adapter to use for this network
+         * @param networkrouter Routing protocol to use for this network
+         */
         mesh_network(connectivity_adapter &connection, router &networkrouter) :
                 connection(
                         connection),
                 network_router(networkrouter) {}
 
+        /**
+         * \brief Add the given nodes to the direct connection blacklist
+         *
+         * The blacklist can be used to force certain nodes to communicate through routing.
+         * This can be used to reduce load on the network, when many nodes are close in proximity.
+         * This can also be used to show that routing works in your code ;).
+         * @tparam n Amount of nodes to add to the blacklist
+         * @param list Array of node_id's to add
+         */
         template<size_t n>
         void add_blacklist(std::array<node_id, n> list) {
             for (const node_id &node: list) {
@@ -48,12 +100,26 @@ namespace mesh {
             }
         }
 
+        /**
+         * \brief Broadcast a discovery message to the network
+         *
+         * Normally, the update function calls this method periodically, so it doesn't need to be called
+         */
         void discover() {
-            message message = {DISCOVERY::PRESENT, 0, connection.address, 0,
-                                    0}; //Todo something with a message id (singleton?)
+            message message = {DISCOVERY::PRESENT, 0, connection.id, 0,
+                               0};
             connection.send(message);
         }
 
+        /**
+         * \brief Check for new received messages.
+         *
+         * This method automatically handles any discovery/routing messages.
+         * Anything that remains will be put in the uncaught array, so the caller can handle it.
+         *
+         * @param uncaught Array reference to put any uncaught messages in
+         * @return The count of uncaught messages
+         */
         uint8_t check_new_messages(std::array<message, 10> &uncaught) {
             uint8_t index = 0;
             while (connection.has_message()) {
@@ -61,7 +127,7 @@ namespace mesh {
                 if (!connection.is_new_message(msg)) { //message already handled
                     continue;
                 }
-                if (msg.receiver == connection.address ||
+                if (msg.receiver == connection.id ||
                     msg.receiver == 0) { //Message is for us, or broadcast, take it
                     if (!handleMessage(msg)) {
                         uncaught[index++] = msg;
@@ -81,13 +147,19 @@ namespace mesh {
             return index;
         }
 
+        /**
+         * \brief Handles discovery and keepalives
+         *
+         * Sends a keepalive, and a discovery message every "keepalive_interval" updates
+         * TODO: seperate this
+         */
         void update() {
             if (update_count++ > keepalive_interval) {
                 update_count = 0;
                 message keepalive = {
                         DISCOVERY::NO_OPERATION,
                         0,
-                        connection.address,
+                        connection.id,
                         0
                 };
 
@@ -97,6 +169,12 @@ namespace mesh {
             }
         }
 
+        /**
+         * \brief Unicast a message to a node, and close it's connection immediately if the transmit fails
+         *
+         * @param msg Message to send
+         * @param next_hop First hop to send it through
+         */
         void unicast_close_if_fail(message &msg, const node_id &next_hop = 0) {
             if (!connection.send(msg, next_hop)) {
                 LOG("UNICAST FAILED", "");
@@ -105,11 +183,17 @@ namespace mesh {
             }
         }
 
+        /**
+         * \brief Unicast a message to all connected neighbours. Close every connection that fails to transmit.
+         *
+         * Is used for keepalives.
+         * @param msg Message to send
+         */
         void unicast_all_close_if_fail(message &msg) {
             size_t count = connection.get_neighbour_count();
             node_id failed[count];
 
-            for(size_t i = 0; i < count; i++) {
+            for (size_t i = 0; i < count; i++) {
                 failed[i] = 0;
             }
 
@@ -124,12 +208,18 @@ namespace mesh {
             }
         }
 
+        /**
+         * \brief Transmit a message to a receiver, using the network_router
+         *
+         * Note that this function ignores failure
+         * @param msg message to send, receiver should be set on this message
+         */
         void sendMessage(message &msg) {
             uint8_t nextAddress = network_router.get_next_hop(msg.receiver);
-            if(nextAddress == 0) {
+            if (nextAddress == 0) {
                 return;
             }
-            msg.sender = connection.address;
+            msg.sender = connection.id;
             if (!connection.send(msg, nextAddress)) {
                 // Todo actual error handling
 //                router.update_neighbours();
@@ -137,6 +227,13 @@ namespace mesh {
             }
         }
 
+        /**
+         * \brief Handle an incoming message
+         *
+         * Checks for blacklisted sender, handles routing messages and discovery messages.
+         * @param msg message to handle
+         * @return True if the message was handled, false if it still needs to be handled by the caller
+         */
         bool handleMessage(message &msg) {
             if ((msg.type & 0x10) > 0) { //This is a routing message
                 network_router.on_routing_message(msg);
@@ -156,8 +253,8 @@ namespace mesh {
                     if (connection.connection_state(msg.sender) == DISCONNECTED) {
                         if (connection.discovery_present_received(msg)) {
                             message connectMessage = {DISCOVERY::RESPOND, 0,
-                                                           connection.address,
-                                                           msg.sender, 0};
+                                                      connection.id,
+                                                      msg.sender, 0};
                             unicast_close_if_fail(connectMessage);
                         }
                     }
@@ -165,15 +262,15 @@ namespace mesh {
                 case DISCOVERY::RESPOND: {
                     if (connection.discovery_respond_received(msg)) {
 
-                        message finishMessage = {DISCOVERY::ACCEPT, 0, connection.address,
-                                                      msg.sender, 0};
+                        message finishMessage = {DISCOVERY::ACCEPT, 0, connection.id,
+                                                 msg.sender, 0};
                         if (connection.send(finishMessage)) {
                             network_router.update_neighbours();
                         }
 
                     } else {
-                        message finishMessage = {DISCOVERY::DENY, 0, connection.address,
-                                                      msg.sender, 0};
+                        message finishMessage = {DISCOVERY::DENY, 0, connection.id,
+                                                 msg.sender, 0};
                         connection.send(finishMessage);
                     }
                     break;
@@ -183,7 +280,7 @@ namespace mesh {
                     network_router.initial_update();
                     break;
                 case DISCOVERY::DENY:
-                    if (msg.receiver == connection.address) {
+                    if (msg.receiver == connection.id) {
                         LOG("DENYING", "");
                         connection.remove_direct_connection(msg.sender);
                     }
@@ -197,13 +294,30 @@ namespace mesh {
             return true;
         }
 
+        /**
+         * \brief Get the connectivity_adapter for this network
+         *
+         * Mainly used by the LCD status display
+         * @return The Connectivity adapter
+         */
         connectivity_adapter &get_connection() const {
             return connection;
         }
 
+        /**
+         * \brief Get the network_router for this network
+         *
+         * Mainly used by the LCD status display
+         * @return The network router
+         */
         router &get_router() const {
             return network_router;
         }
     };
+
+
+    /**
+     * @}
+     */
 }
 #endif //IPASS_MESH_NETWORK_HPP

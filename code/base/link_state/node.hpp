@@ -8,7 +8,7 @@
 namespace link_state {
 
     /**
-     * addtogroup link_state
+     * \addtogroup link_state
      * @{
      */
 

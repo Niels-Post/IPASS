@@ -2,15 +2,15 @@
 #include "connectivity_adapter.hpp"
 #include "../util/cout_debug.hpp"
 
-void mesh::connectivity_adapter::add_message_id(mesh::message &msg)  {
-    if (msg.sender == address && msg.message_id == 0) {
+void mesh::connectivity_adapter::add_message_id(mesh::message &msg) {
+    if (msg.sender == id && msg.message_id == 0) {
         msg.message_id = current_message_id++;
     }
 }
 
-mesh::connectivity_adapter::connectivity_adapter(const mesh::node_id &address)  : address(address) {}
+mesh::connectivity_adapter::connectivity_adapter(const mesh::node_id &my_id) : id(my_id) {}
 
-void mesh::connectivity_adapter::forget_message_history_for(const mesh::node_id &id)  {
+void mesh::connectivity_adapter::forget_message_history_for(const mesh::node_id &id) {
     for (size_t i = 0; i < previous_messages_count; i++) {
         if ((previous_messages[i] >> 8) == id) {
             for (uint8_t j = i; j < previous_messages_count; j++) {
@@ -21,7 +21,7 @@ void mesh::connectivity_adapter::forget_message_history_for(const mesh::node_id 
     }
 }
 
-bool mesh::connectivity_adapter::is_new_message(const mesh::message &msg)  {
+bool mesh::connectivity_adapter::is_new_message(const mesh::message &msg) {
     uint16_t check_value = ((msg.sender << 8) | msg.message_id);
     for (size_t i = 0; i < previous_messages_count; i++) {
         if (previous_messages[i] == check_value) {
@@ -39,7 +39,7 @@ bool mesh::connectivity_adapter::is_new_message(const mesh::message &msg)  {
     return true;
 }
 
-bool mesh::connectivity_adapter::send(mesh::message &message, mesh::node_id next_hop)  {
+bool mesh::connectivity_adapter::send(mesh::message &message, mesh::node_id next_hop) {
     if (next_hop == 0) next_hop = message.receiver;
 
 
@@ -78,16 +78,16 @@ bool mesh::connectivity_adapter::send(mesh::message &message, mesh::node_id next
     return false;
 }
 
-bool mesh::connectivity_adapter::send_all(mesh::message &msg, mesh::node_id *failed_addresses) {
+bool mesh::connectivity_adapter::send_all(mesh::message &message, mesh::node_id *failed_addresses) {
     bool all_successful = true;
     node_id neighbours[get_neighbour_count()];
     get_neighbours(neighbours);
 
-    add_message_id(msg);
+    add_message_id(message);
 
     for (size_t i = 0; i < get_neighbour_count(); i++) {
-        if (connection_state(neighbours[i]) == mesh::ACCEPTED && msg.sender != neighbours[i]) {
-            message copy_msg = msg; //Make a copy with neighbour-specific changes
+        if (connection_state(neighbours[i]) == mesh::ACCEPTED && message.sender != neighbours[i]) {
+            message copy_msg = message; //Make a copy with neighbour-specific changes
             if (!send(copy_msg, neighbours[i])) {
                 if (failed_addresses != nullptr) {
                     *failed_addresses++ = neighbours[i];

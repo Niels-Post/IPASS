@@ -35,8 +35,6 @@ namespace mesh_domotics {
     namespace modules {
 
         rotary_encoder::rotary_encoder(uint8_t id) : output_module(id) {
-//            auto p = hwlib::target::pin_in(hwlib::target::pins::a9);
-
             // Enable peripheral ports
             RCC->APB2ENR |=
                     RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPBEN |
@@ -62,11 +60,6 @@ namespace mesh_domotics {
             GPIOA->CRH |= (0x8 << 1);
             GPIOA->CRH |= (0x8 << 2);
 
-//            GPIOA->ODR |= (1 << 9) | (1 << 10);
-
-//            auto q = hwlib::target::pin_in(hwlib::target::pins::a10);
-//            p.read();
-//            q.read();
 
             // Clear EXTI interrupt line selection, then set it to port A
             AFIO->EXTICR[3] &= ~(AFIO_EXTICR3_EXTI9);

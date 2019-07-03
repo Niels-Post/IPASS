@@ -28,7 +28,12 @@
 
 namespace nrf24l01 {
     /**
-     * Register addresses for the NRF24L01
+     * \addtogroup nrf24l01Plus
+     * @{
+     */
+
+    /**
+     * \brief Register addresses for the NRF24L01
      */
     struct NRF_REGISTER {
         //! Chip configuration register
@@ -87,7 +92,7 @@ namespace nrf24l01 {
 
 
     /**
-     * CONFIG register bit mappings
+     * \brief CONFIG register bit mappings
      */
     struct NRF_CONFIG {
         //! Mask interrupt caused by RX_DataReady event
@@ -107,7 +112,7 @@ namespace nrf24l01 {
     };
 
     /**
-     * EN_AA register bit mappings
+     * \brief EN_AA register bit mappings
      */
     struct NRF_EN_AA {
         //! Enable Auto Acknowledgement for RX Pipe 5
@@ -126,7 +131,7 @@ namespace nrf24l01 {
 
 
     /**
-     * EN_RXADDR register bit mappings
+     * \brief EN_RXADDR register bit mappings
      */
     struct NRF_EN_RXADDR {
         //! Enable Pipe 5
@@ -145,7 +150,7 @@ namespace nrf24l01 {
 
 
     /**
-     * RF_SETUP register bit mappings
+     * \brief RF_SETUP register bit mappings
      */
     struct NRF_RF_SETUP {
         //! Force PLL Lock signal
@@ -160,7 +165,7 @@ namespace nrf24l01 {
     };
 
     /**
-     * STATUS register bit mappings
+     * \brief STATUS register bit mappings
      */
     struct NRF_STATUS {
         //! Flag: Data Ready in RX FIFO (write 1 to clear)
@@ -176,7 +181,7 @@ namespace nrf24l01 {
     };
 
     /**
-     * OBSERVE_TX register bit mappings
+     * \brief OBSERVE_TX register bit mappings
      */
     struct NRF_OBSERVE_TX {
         //! Counter for amount of lost packets
@@ -186,7 +191,7 @@ namespace nrf24l01 {
     };
 
     /**
-     * FIFO_STATUS register bit mappings
+     * \brief FIFO_STATUS register bit mappings
      */
     struct NRF_FIFO_STATUS {
         //! Last TX payload is being reused
@@ -202,7 +207,7 @@ namespace nrf24l01 {
     };
 
     /**
-     * DYNPD register bit mappings
+     * \brief DYNPD register bit mappings
      */
     struct NRF_DYNPD {
         //! Enable Dynamic Payload Length for Pipe 5
@@ -220,7 +225,7 @@ namespace nrf24l01 {
     };
 
     /**
-     * FEATURE register bit mappings
+     * \brief FEATURE register bit mappings
      */
     struct NRF_FEATURE {
         //! Dynamic Payload Length feature is enabled
@@ -232,7 +237,7 @@ namespace nrf24l01 {
     };
 
     /**
-     * NRF24L01 SPI command mnemonics
+     * \brief NRF24L01 SPI command mnemonics
      */
     struct NRF_INSTRUCTION {
         //! Read a memory Register
@@ -259,6 +264,9 @@ namespace nrf24l01 {
         static constexpr const uint8_t RF24_NOP = 0xFF;
     };
 
+    /**
+     * @}
+     */
 
 #ifdef NIKS
     //

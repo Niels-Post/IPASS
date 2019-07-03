@@ -4,7 +4,7 @@
 
 #include "spi_base.hpp"
 
-namespace hwlib_ex {
+namespace spi_ex {
     spi_base_bus::spi_transaction &
     spi_base_bus::spi_transaction::write_read_reverse(size_t n, const uint8_t *data_out, uint8_t *data_in) {
         bus.write_read_reverse(n, data_out, data_in);
@@ -102,11 +102,11 @@ namespace hwlib_ex {
         }
     }
 
-    void spi_base_bus::onStart(hwlib_ex::spi_base_bus::spi_transaction &transaction) {
+    void spi_base_bus::onStart(spi_ex::spi_base_bus::spi_transaction &transaction) {
         transaction.csn.write(false);
     }
 
-    void spi_base_bus::onEnd(hwlib_ex::spi_base_bus::spi_transaction &transaction) {
+    void spi_base_bus::onEnd(spi_ex::spi_base_bus::spi_transaction &transaction) {
         transaction.csn.write(true);
     }
 

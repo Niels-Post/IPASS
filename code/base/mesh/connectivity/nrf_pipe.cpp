@@ -31,8 +31,8 @@ namespace mesh {
         }
 
         bool nrf_pipe::send_message(array<nrf_pipe, 6> &all_pipes, nrf24l01plus &nrf,
-                                         uint8_t n,
-                                         uint8_t *data) {
+                                    uint8_t n,
+                                    uint8_t *data) {
             uint8_t old_mode = nrf.get_mode();
             nrf.mode(nrf.MODE_PTX);
 

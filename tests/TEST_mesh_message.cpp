@@ -74,7 +74,7 @@ TEST_CASE("message, parse without payload") {
     uint8_t data[7] = {0x03, 0x05, 0x07, 0x09, 0x00, 0x0D, 0x0F};
 
     mesh::message msg;
-    msg.parse(7,data);
+    msg.parse(7, data);
     REQUIRE(msg.type == 0x03);
     REQUIRE(msg.message_id == 0x05);
     REQUIRE(msg.sender == 0x07);

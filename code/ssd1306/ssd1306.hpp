@@ -27,13 +27,13 @@ namespace ssd1306 {
     };
 
     struct SCROLLING {
-        static constexpr const uint8_t SETUP_SCROLL_RIGHT= 0x26;
+        static constexpr const uint8_t SETUP_SCROLL_RIGHT = 0x26;
         static constexpr const uint8_t SETUP_SCROLL_LEFT = 0x27;
-        static constexpr const uint8_t SETUP_SCROLL_VERTICAL_RIGHT =  0x29;
-        static constexpr const uint8_t SETUP_SCROLL_VERTICAL_LEFT =  0x2A;
-        static constexpr const uint8_t SCROLL_DEACTIVATE =  0x2E;
-        static constexpr const uint8_t SCROLL_ACTIVATE =  0x2F;
-        static constexpr const uint8_t SET_SCROLL_Y_AREA =  0xA3;
+        static constexpr const uint8_t SETUP_SCROLL_VERTICAL_RIGHT = 0x29;
+        static constexpr const uint8_t SETUP_SCROLL_VERTICAL_LEFT = 0x2A;
+        static constexpr const uint8_t SCROLL_DEACTIVATE = 0x2E;
+        static constexpr const uint8_t SCROLL_ACTIVATE = 0x2F;
+        static constexpr const uint8_t SET_SCROLL_Y_AREA = 0xA3;
     };
 
     struct ADRESSING {
@@ -76,6 +76,7 @@ namespace ssd1306 {
         void write_data(size_t n, uint8_t *data);
 
         void write_command(uint8_t command, size_t n, uint8_t *data);
+
         void write_command_stream(uint8_t command, size_t n, uint8_t *data);
 
     };

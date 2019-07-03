@@ -10,7 +10,7 @@
 #include "module.hpp"
 
 /**
- * \defgroup \title mesh_domotics
+ * \defgroup mesh_domotics Mesh Domotics
  * \brief Home automation-like functionality using a mesh network
  *
  * Provides an abstract interface for making simple hardware modules that serve as:
@@ -29,7 +29,8 @@ namespace mesh_domotics {
      */
 
 /**
- * Bootstrapper class for a domotica node.
+ * \brief Bootstrapper class for a domotica node.
+ *
  * Handles Input and Output to/from modules.
  * Also calls keepalives and discovery on the network
  * */
@@ -44,7 +45,8 @@ namespace mesh_domotics {
 
 
         /**
-         * Create a domotica node
+         * \brief Create a domotica node
+         *
          * If this node is either receive only, or send only, the empty constructor for the corresponding module can be used
          * Depending on the module types, node will either feed data from the network into the module, or feed data from the module into the network
          * @param network Network to connect to and interact with
@@ -52,39 +54,34 @@ namespace mesh_domotics {
          * @param outputModule  Secondary module to use
          */
         node(mesh::mesh_network &network, input_module &inputModule,
-                      output_module &outputModule);
+             output_module &outputModule);
 
 
         /**
-         * Update a module (if it is an input). Feeds received data into the input module, if it's filter matches the sender of the data
-         * @param m Module to update
+         * \brief Update athe input module.
+         *
+         * Feeds received data into the input module, if it's filter matches the sender of the data
+         * @param msg Message to update from
          */
         void update_input_module(mesh::message &msg);
 
 
         /**
-         * Update a module (if it is an output). Checks for any changed data, and sends it to all nodes in filter
-         * @param m Module to update
+         * \brief Update the output module.
+         *
+         * Checks for any changed data, and sends it to all nodes in filter
          */
         void update_output_module();
 
         /**
-         * Main loop for a domotica node (DOESN't RETURN)
+         * \brief Main loop for a domotica node
+         *
+         * (DOESN't RETURN)
          * Handles all basic network interaction (keepalives and discovery)
          */
-        void __attribute__((noreturn)) loop();
+        void loop();
 
-        /**
-         * Change this node's primary module
-         * @param input New primary module
-         */
-        void set_input_module(input_module &input);
 
-        /**
-         * Change this node's secondary module
-         * @param output New secondary module
-         */
-        void set_output_module(output_module &output);
     };
 
     /**

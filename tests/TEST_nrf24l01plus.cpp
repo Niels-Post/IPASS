@@ -7,6 +7,8 @@
 #include "nrf24l01/nrf24l01plus.hpp"
 #include "pin_debug.hpp"
 
+using spi_ex::spi_testing;
+
 TEST_CASE("nrf24l01plus") {
     hwlib::cout << "Testing nrf24l01plus" << hwlib::endl;
 }

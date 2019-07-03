@@ -18,7 +18,7 @@ class cout_debug : public hwlib::ostream {
     hwlib::target::pin_out clk;
     hwlib::target::pin_out mosi;
     hwlib::target::pin_in miso;
-    hwlib_ex::spi_bitbang bus;
+    spi_ex::spi_bitbang bus;
 
 public:
 
