@@ -1,6 +1,11 @@
-//
-// Created by Niels on 7/2/2019.
-//
+/*
+ *
+ * Copyright Niels Post 2019.
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * https://www.boost.org/LICENSE_1_0.txt)
+ *
+*/
 
 #ifndef IPASS_I2C_BACKPACK_HPP
 #define IPASS_I2C_BACKPACK_HPP
@@ -16,7 +21,7 @@ namespace lcd {
      *
      * This is about the most basic implementation you can get, it can only clear the screen and write text to it. \n
      * An operator<< is implemented to enable the use of functions like setw.\n
-     * Since I couldn't actually find the datasheet of this module, I only have the command list, but don't have understanding for all of them.\n
+     * Since I couldn't actually find the datasheet of this module, I only have the command list, but don't have understanding for all of them at the moment.\n
      * Therefore the documentation is lacking.\n
      * This class is based on https://github.com/DzikuVx/WinguWeatherRaspberryPi/blob/master/lcddriver.py\n
      */

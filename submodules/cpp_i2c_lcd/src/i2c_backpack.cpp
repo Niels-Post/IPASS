@@ -1,9 +1,13 @@
-//
-// Created by Niels on 7/2/2019.
-//
+/*
+ *
+ * Copyright Niels Post 2019.
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * https://www.boost.org/LICENSE_1_0.txt)
+ *
+*/
 
-#include <hwlib.hpp>
-#include "i2c_backpack.hpp"
+#include <lcd/i2c_backpack.hpp>
 
 lcd::i2c_backpack::i2c_backpack(hwlib::i2c_bus &bus, uint8_t rows, uint8_t cols, uint8_t address) : bus(bus),
                                                                                                     rows(rows),
