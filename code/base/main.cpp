@@ -19,6 +19,8 @@ int main() {
     auto bus = spi::bus_stm32f10xxx({false, false, 1});
     auto nrf = nrf24l01::nrf24l01plus(bus, hwlib::pin_out_dummy, ce);
 
+
+
     LOG("", "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
     LOG("PROGRAM_STARTING", "");
     hwlib::wait_ms(100);

@@ -17,7 +17,7 @@ SCENARIO("Led_port gives the correct output") {
         auto port = hwlib::port_out_from(pin0, pin1, pin2, pin3, pin4, pin5, pin6, pin7);
         auto led_port = mesh_domotics::modules::led_port(1, port);
 
-        WHEN("A 7 is fed") {
+        WHEN("7 is fed") {
             union mesh_domotics::domotica_value value;
             value.numeric = 7;
             led_port.set_input(value.data);
