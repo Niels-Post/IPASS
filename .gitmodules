@@ -1,0 +1,18 @@
+[submodule "cpp_spi"]
+	path = cpp_spi
+	url = https://github.com/Niels-Post/cpp_spi
+[submodule "cpp_nrf24l01"]
+	path = cpp_nrf24l01
+	url = https://github.com/Niels-Post/cpp_nrf24l01
+[submodule "cpp_mesh"]
+	path = cpp_mesh
+	url = https://github.com/Niels-Post/cpp_mesh
+[submodule "cpp_mesh_domotics"]
+	path = cpp_mesh_domotics
+	url = https://github.com/Niels-Post/cpp_mesh_domotics
+[submodule "cpp_link_state_algorithm"]
+	path = cpp_link_state_algorithm
+	url = https://github.com/Niels-Post/cpp_link_state_algorithm
+[submodule "cpp_i2c_lcd"]
+	path = cpp_i2c_lcd
+	url = https://github.com/Niels-Post/cpp_i2c_lcd
