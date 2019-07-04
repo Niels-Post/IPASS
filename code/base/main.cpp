@@ -1,22 +1,22 @@
 #include <hwlib.hpp>
-#include "spi/spi_bitbang.hpp"
-#include "nrf24l01/nrf24l01plus.hpp"
-#include "mesh/connectivity/nrf.hpp"
-#include "mesh/router/link_state_router.hpp"
-#include "mesh/mesh_network.hpp"
-#include "domotica/module/rotary_encoder.hpp"
-#include "domotica/node.hpp"
-#include "domotica/module/led_port.hpp"
-#include "domotica/module/seven_segment.hpp"
-#include "spi/spi_blue_pill.hpp"
-#include "lcd/i2c_backpack.hpp"
-#include "mesh/addon/status_lcd.hpp"
+#include <spi/bus_bitbang.hpp>
+#include <nrf24l01plus/nrf24l01plus.hpp>
+#include <mesh/connectivity/nrf.hpp>
+#include <mesh/router/link_state_router.hpp>
+#include <mesh/include/mesh/mesh_network.hpp>
+#include <mesh_domotics/module/rotary_encoder.hpp>
+#include <mesh_domotics/include/mesh_domotics/node.hpp>
+#include <mesh_domotics/module/led_port.hpp>
+#include <mesh_domotics/module/seven_segment.hpp>
+#include <lcd/i2c_backpack.hpp>
+#include <mesh/addon/status_lcd.hpp>
+#include <spi/hardware/bus_stm32f10xxx.hpp>
 
 int main() {
 
 
     auto ce = hwlib::target::pin_out(hwlib::target::pins::a3);
-    auto bus = spi_blue_pill({false, false, 1});
+    auto bus = spi::bus_stm32f10xxx({false, false, 1});
     auto nrf = nrf24l01::nrf24l01plus(bus, hwlib::pin_out_dummy, ce);
 
     LOG("", "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");

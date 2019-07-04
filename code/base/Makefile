@@ -9,14 +9,20 @@
 #############################################################################
 
 # source files in this project (main.cpp is automatically assumed)
-SOURCES := domotica/module.cpp domotica/module/led_port.cpp domotica/module/rotary_encoder.cpp domotica/module/seven_segment.cpp domotica/node.cpp lcd/i2c_backpack.cpp mesh/addon/status_lcd.cpp mesh/connectivity/nrf.cpp mesh/connectivity/nrf_pipe.cpp mesh/connectivity_adapter.cpp mesh/router/link_state_router.cpp spi/spi_base.cpp spi/spi_bitbang.cpp spi/spi_blue_pill.cpp vtable.asm
-
+SOURCES :=
 # header files in this project
 HEADERS :=
 
 # other places to look for files for this project
-SEARCH  :=
+SEARCH  := . ./util
 TARGET  := blue_pill
+
+include lcd/Makefile.inc
+include mesh/Makefile.inc
+include mesh_domotics/Makefile.inc
+include link_state/Makefile.inc
+include nrf24l01/Makefile.inc
+include spi/Makefile.inc
 
 
 
@@ -41,4 +47,7 @@ include $(BMPTK)/Makefile.inc
 
 debugtarget:
 	$(info    $(DEFINES))
+
+includedirs:
+	$(info $(SEARCH))
 

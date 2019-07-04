@@ -1,7 +1,11 @@
-
-//
-// Created by Niels on 6/24/2019.
-//
+/*
+ *
+ * Copyright Niels Post 2019.
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * https://www.boost.org/LICENSE_1_0.txt)
+ *
+*/
 
 #ifndef IPASS_COUT_DEBUG_HPP
 #define IPASS_COUT_DEBUG_HPP
@@ -9,7 +13,7 @@
 #include <hwlib.hpp>
 
 
-#define DEBUG_UART
+//#define DEBUG_UART
 
 #ifdef DEBUG_SPI
 #include "../spi/spi_bitbang.hpp"
@@ -65,11 +69,13 @@ public:
 
 #ifndef DEBUG_SPI
 #ifndef DEBUG_UART
+
+
 class cout_debug : public hwlib::ostream {
 
 public:
 
-    cout_debug()  {
+    cout_debug() {
     }
 
     void putc(char c) override {
@@ -80,6 +86,7 @@ public:
 
     }
 };
+
 #endif
 #endif
 
