@@ -26,10 +26,6 @@ include spi/Makefile.inc
 
 
 
-
-
-
-
 STM32_CLI := "/mnt/c/Program Files (x86)/STMicroelectronics/STM32 ST-LINK Utility/ST-LINK Utility/ST-LINK_CLI.exe"
 
 RUN_PAUSE := echo "Run Complete"

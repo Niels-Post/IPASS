@@ -34,8 +34,8 @@ int main() {
     mesh::mesh_network net(mesh_connectivity, router);
 
 
-    mesh_domotics::input_module dummy_in = {0};
-    mesh_domotics::output_module dummy_out = {0};
+    mesh_domotics::output_module dummy_in = {0};
+    mesh_domotics::input_module dummy_out = {0};
 
 
     switch (ID) {
