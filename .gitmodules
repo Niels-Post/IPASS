@@ -1,18 +1,27 @@
-[submodule "cpp_spi"]
-	path = submodules/cpp_spi
-	url = https://github.com/Niels-Post/cpp_spi
-[submodule "cpp_nrf24l01"]
-	path = submodules/cpp_nrf24l01
-	url = https://github.com/Niels-Post/cpp_nrf24l01
-[submodule "cpp_mesh"]
-	path = submodules/cpp_mesh
+[submodule "submodules/mesh"]
+	path = submodules/mesh
 	url = https://github.com/Niels-Post/cpp_mesh
-[submodule "cpp_mesh_domotics"]
-	path = submodules/cpp_mesh_domotics
+[submodule "submodules/mesh_domotics"]
+	path = submodules/mesh_domotics
 	url = https://github.com/Niels-Post/cpp_mesh_domotics
-[submodule "cpp_link_state_algorithm"]
-	path = submodules/cpp_link_state_algorithm
+[submodule "submodules/link_state"]
+	path = submodules/link_state
 	url = https://github.com/Niels-Post/cpp_link_state_algorithm
-[submodule "cpp_i2c_lcd"]
-	path = submodules/cpp_i2c_lcd
+[submodule "submodules/i2c_lcd"]
+	path = submodules/i2c_lcd
 	url = https://github.com/Niels-Post/cpp_i2c_lcd
+[submodule "submodules/nrf24l01"]
+	path = submodules/nrf24l01
+	url = https://github.com/Niels-Post/cpp_nrf24l01
+[submodule "submodules/spi"]
+	path = submodules/spi
+	url = https://github.com/Niels-Post/cpp_spi
+[submodule "submodules/bmptk"]
+	path = submodules/bmptk
+	url = https://github.com/Niels-Post/bmptk
+[submodule "submodules/hwlib"]
+	path = submodules/hwlib
+	url = https://github.com/Niels-Post/hwlib
+[submodule "submodules/catch2"]
+	path = submodules/catch2
+	url = https://github.com/catchorg/Catch2

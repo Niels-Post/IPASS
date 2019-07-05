@@ -13,7 +13,7 @@
 #include <hwlib.hpp>
 
 
-//#define DEBUG_UART
+#define DEBUG_UART
 
 #ifdef DEBUG_SPI
 #include "../spi/spi_bitbang.hpp"

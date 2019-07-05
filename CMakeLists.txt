@@ -2,33 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 
 set(WSL_HOMEDIR "L:/HWLib/HWLIB-Cmake-Tools")
 
-include(${WSL_HOMEDIR}/HWLib_Target.cmake)
 
+include(${WSL_HOMEDIR}/New-Version.cmake)
 
-hwlib_load_auto(${CMAKE_CURRENT_SOURCE_DIR}/code HWLIB_TARGET_blue_pill blue_pill)
-
-target_include_directories(
-        base
-        PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/code/base/
-        ${CMAKE_CURRENT_SOURCE_DIR}/code/base/lcd/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/code/base/spi/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/code/base/nrf24l01/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/code/base/link_state/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/code/base/mesh/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/code/base/mesh_domotics/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/code/base/util
-)
-#
-add_hwlib_target(tests ${CMAKE_CURRENT_SOURCE_DIR}/tests HWLIB_TARGET_native native)
-target_include_directories(tests
-        PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/code/base/
-        ${CMAKE_CURRENT_SOURCE_DIR}/code/base/lcd/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/code/base/spi/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/code/base/nrf24l01/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/code/base/link_state/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/code/base/mesh/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/code/base/mesh_domotics/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/tests/inc
-        )
+add_hwlib_bmptk_target(IPASS "${CMAKE_CURRENT_SOURCE_DIR}" Makefile)
