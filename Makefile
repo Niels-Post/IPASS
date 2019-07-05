@@ -5,7 +5,7 @@
 # https://www.boost.org/LICENSE_1_0.txt)
 #
 
-$(shell git submodule update --recursive --remote)
+$(shell git submodule update --init --recursive)
 
 PROJECT := src/main
 
@@ -38,6 +38,9 @@ include $(BMPTK)/Makefile.inc
 
 #include /mnt/l/HWLib/HWLIB-Cmake-Tools/Makefile.inc
 
+
+update:
+	git submodule update --recursive --remote
 
 
 testing:
