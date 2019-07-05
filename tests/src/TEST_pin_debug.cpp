@@ -1,4 +1,5 @@
-#include <catch.hpp>
+
+#include <single_include/catch2/catch.hpp>
 #include <pin_debug.hpp>
 
 

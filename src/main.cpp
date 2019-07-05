@@ -93,13 +93,13 @@ void module3_sevendigit(mesh::mesh_network &net) {
 
     auto dummy_in = mesh_domotics::input_module(0);
 
-    auto _a = hwlib::target::pin_out(hwlib::target::pins::b14);
-    auto _b = hwlib::target::pin_out(hwlib::target::pins::b15);
-    auto _c = hwlib::target::pin_out(hwlib::target::pins::a11);
-    auto _d = hwlib::target::pin_out(hwlib::target::pins::a10);
-    auto _e = hwlib::target::pin_out(hwlib::target::pins::a9);
-    auto _f = hwlib::target::pin_out(hwlib::target::pins::b13);
-    auto _g = hwlib::target::pin_out(hwlib::target::pins::b12);
+    auto _a = hwlib::target::pin_out(hwlib::target::pins::a9);
+    auto _b = hwlib::target::pin_out(hwlib::target::pins::a11);
+    auto _c = hwlib::target::pin_out(hwlib::target::pins::b14);
+    auto _d = hwlib::target::pin_out(hwlib::target::pins::b13);
+    auto _e = hwlib::target::pin_out(hwlib::target::pins::b12);
+    auto _f = hwlib::target::pin_out(hwlib::target::pins::a10);
+    auto _g = hwlib::target::pin_out(hwlib::target::pins::b15);
 
     auto port = hwlib::port_out_from(_a, _b, _c, _d, _e, _f, _g);
     mesh_domotics::modules::seven_segment s(1, port);

@@ -1,7 +1,7 @@
 
 #include <mesh_domotics/module/seven_segment.hpp>
 #include <mesh_domotics/module/led_port.hpp>
-#include <catch.hpp>
+#include "../../submodules/catch2/single_include/catch2/catch.hpp"
 #include <pin_debug.hpp>
 
 SCENARIO("Led_port gives the correct output") {

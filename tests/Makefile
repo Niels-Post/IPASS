@@ -15,7 +15,7 @@ SOURCES += src/TEST_mesh_message.cpp
 
 HEADERS := inc/pin_debug.hpp
 
-SEARCH  := inc/ ../code/base/util/
+SEARCH  := inc/
 
 TARGET  := native
 
@@ -28,18 +28,18 @@ include ../submodules/spi/Makefile.inc
 
 PROJECT_CPP_FLAGS += -fexceptions
 
-SEARCH += $(HOME)/Catch2/single_include
-SEARCH += $(HOME)/Catch2/single_include/catch2
+SEARCH += ../submodules/catch2
+HEADERS += ../submodules/catch2/single_include/catch2/catch.hpp
 
 
 # set RELATIVE to the next higher directory
 # and defer to the appropriate Makefile.* there
 RELATIVE := ..
 
-HWLIB             ?= $(HOME)/hwlib
+HWLIB             ?= ../submodules/hwlib
 include $(HWLIB)/makefile.inc
 
-BMPTK             ?= $(HOME)/bmptk
+BMPTK             ?= ../submodules/bmptk
 include $(BMPTK)/Makefile.inc
 
 debugtarget:

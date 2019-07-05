@@ -3,7 +3,7 @@
 //
 
 #include <spi/bus_testing.hpp>
-#include <catch.hpp>
+#include <single_include/catch2/catch.hpp>
 #include <nrf24l01plus/nrf24l01plus.hpp>
 #include <pin_debug.hpp>
 

@@ -1,7 +1,7 @@
 //
 // Created by Niels on 6/25/2019.
 //
-#include <catch.hpp>
+#include <single_include/catch2/catch.hpp>
 #include <hwlib.hpp>
 #include <link_state/node.hpp>
 #include <link_state/calculator.hpp>

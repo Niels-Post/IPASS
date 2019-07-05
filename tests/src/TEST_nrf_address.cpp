@@ -2,7 +2,7 @@
 // Created by Niels on 6/25/2019.
 //
 #include <hwlib.hpp>
-#include <catch.hpp>
+#include <single_include/catch2/catch.hpp>
 #include <nrf24l01plus/address.hpp>
 
 using nrf24l01::address;

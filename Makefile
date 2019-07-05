@@ -5,6 +5,8 @@
 # https://www.boost.org/LICENSE_1_0.txt)
 #
 
+$(shell git submodule update --recursive --remote)
+
 PROJECT := src/main
 
 HWLIB := ./submodules/hwlib
@@ -34,10 +36,15 @@ include $(HWLIB)/makefile.inc
 include $(BMPTK)/Makefile.inc
 
 
-include /mnt/l/HWLib/HWLIB-Cmake-Tools/Makefile.inc
+#include /mnt/l/HWLib/HWLIB-Cmake-Tools/Makefile.inc
 
-tests:
-	cd tests && $(MAKE) build
+
+
+testing:
+	cd tests && $(MAKE) run
+
+
+
 
 
 

@@ -1,6 +1,7 @@
 #include <spi/bus_testing.hpp>
 
-#include "catch.hpp"
+
+#include <single_include/catch2/catch.hpp>
 
 
 TEST_CASE("bus_testing") {
