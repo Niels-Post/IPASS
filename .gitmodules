@@ -1,0 +1,32 @@
+[submodule "submodules/i2c_lcd"]
+	path = submodules/i2c_lcd
+	url = https://github.com/Niels-Post/cpp_i2c_lcd
+	branch = master
+[submodule "submodules/mesh"]
+	path = submodules/mesh
+	url = https://github.com/Niels-Post/cpp_mesh
+	branch = master
+[submodule "submodules/mesh_domotics"]
+	path = submodules/mesh_domotics
+	url = https://github.com/Niels-Post/cpp_mesh_domotics
+	branch = master
+[submodule "submodules/spi"]
+	path = submodules/spi
+	url = https://github.com/Niels-Post/cpp_spi
+	branch = master
+[submodule "submodules/link_state"]
+	path = submodules/link_state
+	url = https://github.com/Niels-Post/cpp_link_state_algorithm
+	branch = master
+[submodule "submodules/nrf24l01"]
+	path = submodules/nrf24l01
+	url = https://github.com/Niels-Post/cpp_nrf24l01
+	branch = master
+[submodule "submodules/hwlib"]
+	path = submodules/hwlib
+	url = https://github.com/Niels-Post/hwlib
+	branch = master
+[submodule "submodules/bmptk"]
+	path = submodules/bmptk
+	url = https://github.com/Niels-Post/bmptk
+	branch = master
