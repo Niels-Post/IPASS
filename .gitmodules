@@ -30,3 +30,7 @@
 	path = submodules/bmptk
 	url = https://github.com/Niels-Post/bmptk
 	branch = master
+[submodule "submodules/catch2"]
+	path = submodules/catch2
+	url = https://github.com/catchorg/Catch2
+	branch = master
